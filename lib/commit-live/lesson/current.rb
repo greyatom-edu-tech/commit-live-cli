@@ -4,7 +4,7 @@ require 'json'
 
 module CommitLive
 	class Current
-		attr_accessor :lesson
+		attr_accessor :lesson, :netrc
 
 		def initialize()
 			@netrc = CommitLive::NetrcInteractor.new()
@@ -16,7 +16,7 @@ module CommitLive
 					netrc.read
 					token = netrc.password
 					response = CommitLive::API.new().get(
-						'/current_lesson',
+						'/v1/current_lesson',
 						headers: { 'access-token' => "#{token}" }
 					)
 					if response.status == 200

@@ -18,7 +18,7 @@ module CommitLive
 			begin
 				Timeout::timeout(15) do
 					response = CommitLive::API.new().get(
-						"/users/#{token}", 
+						"/v1/users/#{token}", 
 						headers: { 'access-token' => "#{token}" }
 					)
 					if response.status == 200

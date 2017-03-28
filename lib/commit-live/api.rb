@@ -4,7 +4,7 @@ module CommitLive
 	class API
 		attr_reader :conn
 
-		URL = 'http://api.greyatom.com/v1'
+		URL = 'http://api.greyatom.com'
 		API_ROOT  = '/api/v1'
 
 		def initialize()
