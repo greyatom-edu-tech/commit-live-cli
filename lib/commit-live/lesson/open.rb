@@ -7,22 +7,23 @@ require 'git'
 
 module CommitLive
 	class Open
-		attr_reader :lessonName, :rootDir, :lesson
+		attr_reader :lessonName, :rootDir, :lesson, :forkedRepo
 
 		HOME_DIR = File.expand_path("~")
 
-	    def initialize()
-	      	if File.exists?("#{HOME_DIR}/.ga-config")
-	      		@rootDir = YAML.load(File.read("#{HOME_DIR}/.ga-config"))[:workspace]
-	      	end
-	      	@lesson = CommitLive::Current.new
-	    end
+		def initialize()
+			if File.exists?("#{HOME_DIR}/.ga-config")
+				@rootDir = YAML.load(File.read("#{HOME_DIR}/.ga-config"))[:workspace]
+			end
+			@lesson = CommitLive::Current.new
+		end
 
 		def openALesson(*puzzle_name)
 			# get currently active lesson
 			puts "Getting current lesson..."
 			lesson.getCurrentLesson(puzzle_name)
-			@lessonName = lesson.getAttr('lesson_name')
+			lessonData = lesson.getAttr('data')
+			@lessonName = lessonData['chapters']['lessons']['title']
 			if !File.exists?("#{rootDir}/#{lessonName}")
 				# fork lesson repo via github api
 				forkCurrentLesson
@@ -41,8 +42,9 @@ module CommitLive
 			github = CommitLive::Github.new()
 			begin
 				Timeout::timeout(15) do
-					lessonRepo = lesson.getAttr('github_repo')
-					forkedRepo = github.client.fork(lessonRepo)
+					lessonData = lesson.getAttr('data')
+					lessonRepo = lessonData['chapters']['lessons']['repo_url']
+					@forkedRepo = github.client.fork(lessonRepo)
 				end
 			rescue Octokit::Error => err
 				puts "Error while forking!"
@@ -57,18 +59,17 @@ module CommitLive
 		def cloneCurrentLesson
 			puts "Cloning lesson..."
 			begin
-	          	Timeout::timeout(15) do
-	          		cloneUrl = lesson.getAttr('forked_repo')
-	            	Git.clone("git@github.com:#{cloneUrl}.git", lessonName, path: rootDir)
-	          	end
-	        rescue Git::GitExecuteError => err
-	            puts "Error while cloning!"
-	            puts err
-	            exit
-	        rescue Timeout::Error
-	            puts "Cannot clone this lesson right now. Please try again."
-	            exit
-	        end
+				Timeout::timeout(15) do
+					Git.clone(forkedRepo.ssh_url, lessonName, path: rootDir)
+				end
+			rescue Git::GitExecuteError => err
+				puts "Error while cloning!"
+				puts err
+				exit
+			rescue Timeout::Error
+				puts "Cannot clone this lesson right now. Please try again."
+				exit
+			end
 		end
 
 		def change_grp_owner
@@ -76,7 +77,7 @@ module CommitLive
 			if results
 				puts "..."
 			else
-	            puts "Couldn't change group ownership"
+				puts "Couldn't change group ownership"
 			end
 		end
 

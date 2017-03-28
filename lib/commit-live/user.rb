@@ -17,7 +17,10 @@ module CommitLive
 			puts "Authenticating..."
 			begin
 				Timeout::timeout(15) do
-					response = CommitLive::API.new().get('/bins/c4vbn')
+					response = CommitLive::API.new().get(
+						"/users/#{token}", 
+						headers: { 'access-token' => "#{token}" }
+					)
 					if response.status == 200
 						# Save valid user details in netrc
 						user = JSON.parse(response.body)
@@ -25,17 +28,17 @@ module CommitLive
 						if login.nil? || password.nil?
 							save(user, token)
 						else
-							username = user.fetch('username')
+							username = user.fetch('data')['username']
 							welcome(username)
 						end
 					else
 						case response.status
 			            when 401
-			              puts "It seems your OAuth token is incorrect. Please retry with correct token."
-			              exit 1
+			              	puts "It seems your OAuth token is incorrect. Please retry with correct token."
+			              	exit 1
 			            else
-			              puts "Something went wrong. Please try again."
-			              exit 1
+			              	puts "Something went wrong. Please try again."
+			              	exit 1
 			            end
 					end
 				end
@@ -46,8 +49,9 @@ module CommitLive
 		end
 
 		def save(userDetails, token)
-			username = userDetails.fetch('username')
-			github_uid = userDetails.fetch('github_uid')
+			user_data = userDetails.fetch('data')
+			username = user_data['username']
+			github_uid = user_data['id']
 			netrc.write(new_login: 'greyatom', new_password: token)
 			netrc.write(machine: 'ga-extra', new_login: username, new_password: github_uid)
 			welcome(username)

@@ -3,8 +3,8 @@
 require 'commit-live'
 
 if ['-v', '--version'].include?(ARGV.first)
-  puts CommitLive::Cli::VERSION
-  exit
+	puts CommitLive::Cli::VERSION
+	exit
 end
 
 CommitLive::OptionsSanitizer.new( ARGV ).sanitize!
