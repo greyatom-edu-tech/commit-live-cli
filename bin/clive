@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'commit-live'
+
+if ['-v', '--version'].include?(ARGV.first)
+  puts CommitLive::Cli::VERSION
+  exit
+end
+
+CommitLive::OptionsSanitizer.new( ARGV ).sanitize!
+
+COMMANDS_THAT_REQUIRE_OAUTH = [
+	'submit',
+	'open'
+]
+
+netrc = CommitLive::NetrcInteractor.new()
+netrc.read
+token = netrc.password
+if token.nil? && COMMANDS_THAT_REQUIRE_OAUTH.include?(ARGV[0])
+	puts 'You are not authorized to use this command. Run `clive setup` get started.'
+	exit
+end
+
+CommitLive::CLI.start( ARGV )
