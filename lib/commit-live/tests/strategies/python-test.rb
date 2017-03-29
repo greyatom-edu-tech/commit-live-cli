@@ -12,7 +12,7 @@ module CommitLive
 			end
 
 			def run
-				system("nosetests")
+				system("nosetests --verbose")
 			end
 		end
 	end

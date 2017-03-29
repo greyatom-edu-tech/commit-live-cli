@@ -1,4 +1,5 @@
 require "commit-live/lesson/current"
+require "commit-live/lesson/status"
 require "commit-live/netrc-interactor"
 require "commit-live/api"
 require "commit-live/github"
@@ -7,7 +8,7 @@ require 'git'
 
 module CommitLive
 	class Open
-		attr_reader :lessonName, :rootDir, :lesson, :forkedRepo
+		attr_reader :lessonName, :rootDir, :lesson, :forkedRepo, :lesson_status
 
 		HOME_DIR = File.expand_path("~")
 
@@ -16,6 +17,7 @@ module CommitLive
 				@rootDir = YAML.load(File.read("#{HOME_DIR}/.ga-config"))[:workspace]
 			end
 			@lesson = CommitLive::Current.new
+			@lesson_status = CommitLive::Status.new
 		end
 
 		def openALesson(*puzzle_name)
@@ -31,6 +33,9 @@ module CommitLive
 				cloneCurrentLesson
 				# change group owner
 				change_grp_owner
+				# lesson forked API change
+				puts 'Updating lesson status...'
+				lesson_status.update('lesson_forked', lessonName)
 			end
 			# install dependencies
 			# cd into it and invoke bash

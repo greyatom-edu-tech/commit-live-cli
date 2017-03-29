@@ -1,11 +1,12 @@
 require "commit-live/lesson/current"
+require "commit-live/lesson/status"
 require "commit-live/netrc-interactor"
 require "commit-live/github"
 
 module CommitLive
 	class Submit
 		class GitHelper
-			attr_reader   :git, :currentLesson, :netrc
+			attr_reader   :git, :currentLesson, :netrc, :status
 			attr_accessor :remote_name
 
 			REPO_BELONGS_TO_US = [
@@ -16,6 +17,7 @@ module CommitLive
 				@git = setGit
 				@netrc = CommitLive::NetrcInteractor.new()
 				@currentLesson = CommitLive::Current.new
+				@status = CommitLive::Status.new
 			end
 
 			def commitAndPush
@@ -25,6 +27,7 @@ module CommitLive
 
 				push
 				createPullRequest
+				update_lesson_status
 			end
 
 			private
@@ -98,7 +101,7 @@ module CommitLive
 				puts 'Creating Pull Request...'
 				currentLesson.getCurrentLesson
 				userGithub = CommitLive::Github.new()
-				netrc.read
+				netrc.read(machine: 'ga-extra')
 				username = netrc.login
 				begin
 					Timeout::timeout(45) do
@@ -115,11 +118,18 @@ module CommitLive
 				rescue Octokit::Error => err
 					puts "Error while creating PR!"
 					puts err
-					exit
+					exit 1
 				rescue Timeout::Error
 					puts "Please check your internet connection."
-					exit
+					exit 1
 				end
+			end
+
+			def update_lesson_status
+				puts 'Updating lesson status...'
+				lessonData = currentLesson.getAttr('data')
+				lessonName = lessonData['chapters']['lessons']['title']
+				status.update('submitted_pull_request', lessonName)
 			end
 		end
 	end
