@@ -5,6 +5,8 @@ require 'commit-live/tests/strategies/python-test'
 
 module CommitLive
 	class Test
+		attr_reader :git
+
 		REPO_BELONGS_TO_US = [
 			'commit-live-students'
 		]
@@ -23,13 +25,18 @@ module CommitLive
 		end
 
 		def check_lesson_dir
-			git = set_git
+			@git = set_git
 			netrc = CommitLive::NetrcInteractor.new()
 			netrc.read(machine: 'ga-extra')
 			username = netrc.login
 			if git.remote.url.match(/#{username}/i).nil? && git.remote.url.match(/#{REPO_BELONGS_TO_US.join('|').gsub('-','\-')}/i).nil?
 				put_error_msg
 			end
+		end
+
+		def repo_name(remote: remote_name)
+			url = git.remote(remote).url
+			url.match(/^.+[\w-]+\/(.*?)(?:\.git)?$/)[1]
 		end
 
 		def put_error_msg
@@ -43,7 +50,7 @@ module CommitLive
 			strategy.configure
 			results = strategy.run
 			puts 'Updating lesson status...'
-			lessonName = File.basename(Dir.getwd)
+			lessonName = repo_name(remote: 'origin')
 			if results
 				# test case passed
 				CommitLive::Status.new().update('test_case_pass', lessonName)

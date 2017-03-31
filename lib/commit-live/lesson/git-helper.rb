@@ -99,22 +99,23 @@ module CommitLive
 
 			def createPullRequest
 				puts 'Creating Pull Request...'
-				currentLesson.getCurrentLesson
+				lessonName = repo_name(remote: 'origin')
+				currentLesson.getCurrentLesson(lessonName)
 				userGithub = CommitLive::Github.new()
 				netrc.read(machine: 'ga-extra')
 				username = netrc.login
 				begin
 					Timeout::timeout(45) do
-					lessonData = currentLesson.getAttr('data')
-					parentRepo = lessonData['chapters']['lessons']['repo_url']
-					pullRequest = userGithub.client.create_pull_request(
-						parentRepo,
-						'master',
-						"#{username}:master",
-						"PR by #{username}"
-					)
-					puts "Lesson submitted successfully!"
-				end
+						lessonData = currentLesson.getAttr('data')
+						parentRepo = lessonData['repo_url']
+						pullRequest = userGithub.client.create_pull_request(
+							parentRepo,
+							'master',
+							"#{username}:master",
+							"PR by #{username}"
+						)
+						puts "Lesson submitted successfully!"
+					end
 				rescue Octokit::Error => err
 					puts "Error while creating PR!"
 					puts err
@@ -125,10 +126,14 @@ module CommitLive
 				end
 			end
 
+			def repo_name(remote: remote_name)
+				url = git.remote(remote).url
+				url.match(/^.+[\w-]+\/(.*?)(?:\.git)?$/)[1]
+			end
+
 			def update_lesson_status
 				puts 'Updating lesson status...'
-				lessonData = currentLesson.getAttr('data')
-				lessonName = lessonData['chapters']['lessons']['title']
+				lessonName = repo_name(remote: 'origin')
 				status.update('submitted_pull_request', lessonName)
 			end
 		end

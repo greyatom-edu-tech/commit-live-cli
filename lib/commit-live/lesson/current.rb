@@ -10,13 +10,21 @@ module CommitLive
 			@netrc = CommitLive::NetrcInteractor.new()
 		end
 
-		def getCurrentLesson(*puzzle_name)
+		def getCurrentLesson(puzzle_name)
+			url = '/v1/current_lesson'
+			if !puzzle_name.empty?
+				url = "/v1/user/lesson/#{puzzle_name}"
+			end
+			getLesson(url)
+		end
+
+		def getLesson(url)
 			begin
 				Timeout::timeout(15) do
 					netrc.read
 					token = netrc.password
 					response = CommitLive::API.new().get(
-						'/v1/current_lesson',
+						url,
 						headers: { 'access-token' => "#{token}" }
 					)
 					if response.status == 200

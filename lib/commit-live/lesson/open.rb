@@ -20,12 +20,16 @@ module CommitLive
 			@lesson_status = CommitLive::Status.new
 		end
 
-		def openALesson(*puzzle_name)
+		def openALesson(puzzle_name)
 			# get currently active lesson
 			puts "Getting current lesson..."
 			lesson.getCurrentLesson(puzzle_name)
 			lessonData = lesson.getAttr('data')
-			@lessonName = lessonData['chapters']['lessons']['title']
+			if !lessonData['chapters'].nil?
+				@lessonName = lessonData['chapters']['lessons']['title']
+			else
+				@lessonName = lessonData['title']
+			end
 			if !File.exists?("#{rootDir}/#{lessonName}")
 				# fork lesson repo via github api
 				forkCurrentLesson
