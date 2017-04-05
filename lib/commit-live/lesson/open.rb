@@ -52,7 +52,11 @@ module CommitLive
 			begin
 				Timeout::timeout(15) do
 					lessonData = lesson.getAttr('data')
-					lessonRepo = lessonData['chapters']['lessons']['repo_url']
+					if !lessonData['chapters'].nil?
+						lessonRepo = lessonData['chapters']['lessons']['repo_url']
+					else
+						lessonRepo = lessonData['repo_url']
+					end
 					@forkedRepo = github.client.fork(lessonRepo)
 				end
 			rescue Octokit::Error => err
