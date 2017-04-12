@@ -11,14 +11,14 @@ module CommitLive
 				if name.chars.include?(' ')
 					slugify_name!
 				else
-					name.downcase.strip
+					name.strip
 				end
 			end
 
 			private
 
 			def slugify_name!
-				name.downcase.gsub(' ', '-').strip
+				name.gsub(' ', '-').strip
 			end
 		end
 	end
