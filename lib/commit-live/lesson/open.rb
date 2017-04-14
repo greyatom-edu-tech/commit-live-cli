@@ -25,10 +25,10 @@ module CommitLive
 			puts "Getting current lesson..."
 			lesson.getCurrentLesson(puzzle_name)
 			lessonData = lesson.getAttr('data')
-			if !lessonData['chapters'].nil?
-				@lessonName = lessonData['chapters']['lessons']['title']
+			if !lessonData['current_track'].nil?
+				@lessonName = lessonData['current_track']['track_slug']
 			else
-				@lessonName = lessonData['title']
+				@lessonName = lessonData['track_slug']
 			end
 			if !File.exists?("#{rootDir}/#{lessonName}")
 				# fork lesson repo via github api
@@ -39,7 +39,7 @@ module CommitLive
 				change_grp_owner
 				# lesson forked API change
 				puts 'Updating lesson status...'
-				lesson_status.update('lesson_forked', lessonName)
+				lesson_status.update('forked', lessonName)
 			end
 			# install dependencies
 			# cd into it and invoke bash
@@ -52,8 +52,8 @@ module CommitLive
 			begin
 				Timeout::timeout(15) do
 					lessonData = lesson.getAttr('data')
-					if !lessonData['chapters'].nil?
-						lessonRepo = lessonData['chapters']['lessons']['repo_url']
+					if !lessonData['current_track'].nil?
+						lessonRepo = lessonData['current_track']['repo_url']
 					else
 						lessonRepo = lessonData['repo_url']
 					end

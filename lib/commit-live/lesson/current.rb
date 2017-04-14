@@ -11,9 +11,9 @@ module CommitLive
 		end
 
 		def getCurrentLesson(puzzle_name)
-			url = '/v1/current_lesson'
+			url = '/v1/current_track'
 			if !puzzle_name.empty?
-				url = "/v1/user/lesson/#{puzzle_name}"
+				url = "/v1/user/track/#{puzzle_name}"
 			end
 			getLesson(url)
 		end

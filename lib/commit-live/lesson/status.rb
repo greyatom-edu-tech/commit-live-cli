@@ -11,12 +11,12 @@ module CommitLive
 			@netrc = CommitLive::NetrcInteractor.new()
 		end
 
-		def update(type, lessonName)
+		def update(type, trackName)
 			begin
 				Timeout::timeout(15) do
 					netrc.read
 					token = netrc.password
-					enc_url = URI.escape("/v1/user/lesson/#{lessonName}")
+					enc_url = URI.escape("/v1/user/track/#{trackName}")
 					response = api.post(
 						enc_url,
 						headers: { 'access-token' => "#{token}" },
