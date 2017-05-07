@@ -25,10 +25,17 @@ module CommitLive
 			puts "Getting current lesson..."
 			lesson.getCurrentLesson(puzzle_name)
 			lessonData = lesson.getAttr('data')
+			isAssignment = false;
 			if !lessonData['current_track'].nil?
 				@lessonName = lessonData['current_track']['track_slug']
+				isAssignment = lessonData['current_track']['assignment_flag']
 			else
 				@lessonName = lessonData['track_slug']
+				isAssignment = lessonData['assignment_flag']
+			end
+			if !isAssignment
+				puts "This is a read only lesson!"
+				exit
 			end
 			if !File.exists?("#{rootDir}/#{lessonName}")
 				# fork lesson repo via github api
