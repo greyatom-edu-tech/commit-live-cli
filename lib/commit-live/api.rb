@@ -1,14 +1,13 @@
 require "faraday"
+require "commit-live/endpoint"
 
 module CommitLive
 	class API
 		attr_reader :conn
 
-		URL = 'http://api.greyatom.com'
-		API_ROOT  = '/api/v1'
-
 		def initialize()
-			@conn = Faraday.new(url: URL) do |faraday|
+			endpoint = CommitLive::Endpoint.new.get()
+			@conn = Faraday.new(url: endpoint) do |faraday|
 				faraday.adapter Faraday.default_adapter
 			end
 		end
