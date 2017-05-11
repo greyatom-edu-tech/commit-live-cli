@@ -45,19 +45,22 @@ module CommitLive
 			exit 1
 		end
 
-		def run
+		def run(updateStatus = true)
 			strategy.check_dependencies
 			strategy.configure
 			results = strategy.run
-			puts 'Updating lesson status...'
-			lessonName = repo_name(remote: 'origin')
-			if results
-				# test case passed
-				CommitLive::Status.new().update('test_case_pass', lessonName)
-			else
-				# test case failed
-				CommitLive::Status.new().update('test_case_fail', lessonName)
+			if updateStatus
+				puts 'Updating lesson status...'
+				lessonName = repo_name(remote: 'origin')
+				if results
+					# test case passed
+					CommitLive::Status.new().update('test_case_pass', lessonName)
+				else
+					# test case failed
+					CommitLive::Status.new().update('test_case_fail', lessonName)
+				end
 			end
+			return results
 		end
 
 		def strategy

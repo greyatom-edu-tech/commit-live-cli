@@ -1,5 +1,6 @@
 require "commit-live/lesson/current"
 require "commit-live/lesson/status"
+require "commit-live/tests/runner"
 require "commit-live/netrc-interactor"
 require "commit-live/github"
 
@@ -22,12 +23,19 @@ module CommitLive
 
 			def commitAndPush
 				checkRemote
-				addChanges
-				commitChanges
+				testCasePassed = CommitLive::Test.new().run(false)
+				if testCasePassed
+					addChanges
+					commitChanges
 
-				push
-				createPullRequest
-				update_lesson_status
+					push
+					createPullRequest
+					update_lesson_status
+				else
+					puts "..."
+					puts "Please make sure all test cases pass before submitting!"
+					exit
+				end
 			end
 
 			private
