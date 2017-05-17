@@ -44,6 +44,8 @@ module CommitLive
 				cloneCurrentLesson
 				# change group owner
 				change_grp_owner
+				# change test dir owner
+				change_test_dir_owner
 				# lesson forked API change
 				puts 'Updating lesson status...'
 				lesson_status.update('forked', lessonName)
@@ -93,12 +95,14 @@ module CommitLive
 		end
 
 		def change_grp_owner
-			results = system("chgrp -R ubuntu #{rootDir}/#{lessonName}")
-			if results
-				puts "..."
-			else
-				puts "Couldn't change group ownership"
-			end
+			system("chgrp -R ubuntu #{rootDir}/#{lessonName}")
+		end
+
+		def change_test_dir_owner
+			netrc = CommitLive::NetrcInteractor.new()
+			netrc.read(machine: 'ga-extra')
+			username = netrc.login
+			system("chown -R #{username}:#{username} #{rootDir}/#{lessonName}/tests")
 		end
 
 		def cdToLesson
