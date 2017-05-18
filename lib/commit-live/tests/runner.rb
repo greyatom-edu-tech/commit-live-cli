@@ -46,11 +46,11 @@ module CommitLive
 		end
 
 		def run(updateStatus = true)
+			clear_changes_in_tests
 			strategy.check_dependencies
 			strategy.configure
 			results = strategy.run
 			if updateStatus
-				puts 'Updating lesson status...'
 				lessonName = repo_name(remote: 'origin')
 				if results
 					# test case passed
@@ -65,6 +65,10 @@ module CommitLive
 
 		def strategy
 			@strategy ||= strategies.map{ |s| s.new() }.detect(&:detect)
+		end
+
+		def clear_changes_in_tests
+			system("git checkout HEAD -- tests/")
 		end
 
 		private

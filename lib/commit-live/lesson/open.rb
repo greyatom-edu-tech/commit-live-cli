@@ -1,6 +1,5 @@
 require "commit-live/lesson/current"
 require "commit-live/lesson/status"
-require "commit-live/netrc-interactor"
 require "commit-live/api"
 require "commit-live/github"
 require 'octokit'
@@ -44,10 +43,7 @@ module CommitLive
 				cloneCurrentLesson
 				# change group owner
 				change_grp_owner
-				# change test dir owner
-				change_test_dir_owner
 				# lesson forked API change
-				puts 'Updating lesson status...'
 				lesson_status.update('forked', lessonName)
 			end
 			# install dependencies
@@ -96,13 +92,6 @@ module CommitLive
 
 		def change_grp_owner
 			system("chgrp -R ubuntu #{rootDir}/#{lessonName}")
-		end
-
-		def change_test_dir_owner
-			netrc = CommitLive::NetrcInteractor.new()
-			netrc.read(machine: 'ga-extra')
-			username = netrc.login
-			system("chown -R #{username}:#{username} #{rootDir}/#{lessonName}/tests")
 		end
 
 		def cdToLesson

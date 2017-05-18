@@ -140,7 +140,6 @@ module CommitLive
 			end
 
 			def update_lesson_status
-				puts 'Updating lesson status...'
 				lessonName = repo_name(remote: 'origin')
 				status.update('submitted_pull_request', lessonName)
 			end

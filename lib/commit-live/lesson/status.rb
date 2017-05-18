@@ -12,6 +12,7 @@ module CommitLive
 		end
 
 		def update(type, trackName)
+			puts 'Updating lesson status...'
 			begin
 				Timeout::timeout(15) do
 					netrc.read
@@ -25,10 +26,8 @@ module CommitLive
 							'action' => type
 						}
 					)
-					if response.status == 202
-						puts "Lesson Status updated!"
-					else
-						puts "Something went wrong. Please try again."
+					if response.status != 202
+						puts "Failed updating lesson status."
 						exit 1
 					end
 				end
