@@ -1,13 +1,12 @@
 require "commit-live/lesson/current"
 require "commit-live/lesson/status"
-require "commit-live/tests/runner"
 require "commit-live/netrc-interactor"
 require "commit-live/github"
 
 module CommitLive
 	class Submit
 		class GitHelper
-			attr_reader   :git, :currentLesson, :netrc, :status
+			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName
 			attr_accessor :remote_name
 
 			REPO_BELONGS_TO_US = [
@@ -19,21 +18,33 @@ module CommitLive
 				@netrc = CommitLive::NetrcInteractor.new()
 				@currentLesson = CommitLive::Current.new
 				@status = CommitLive::Status.new
+				@lessonName = repo_name(remote: 'origin')
 			end
 
 			def commitAndPush
 				checkRemote
-				testCasePassed = CommitLive::Test.new().run(false)
+
+				currentLesson.getCurrentLesson(lessonName)
+				lessonData = currentLesson.getAttr('data')
+				testCasePassed = lessonData['test_case_pass']
+				# Check if User passed test cases
 				if testCasePassed
+					# Push to User's Github
 					addChanges
 					commitChanges
-
 					push
-					createPullRequest
-					update_lesson_status
+
+					pullRequestSubmitted = lessonData['submitted_pull_request']
+					if !pullRequestSubmitted
+						# Create Pull Request
+						createPullRequest
+						update_lesson_status
+					end
+
+					puts "Done."
 				else
-					puts "..."
-					puts "Please make sure all test cases pass before submitting!"
+					puts "It seems you have not passed all the test cases."
+					puts "Please execute `clive test` before submitting your code!"
 					exit
 				end
 			end
@@ -107,8 +118,6 @@ module CommitLive
 
 			def createPullRequest
 				puts 'Creating Pull Request...'
-				lessonName = repo_name(remote: 'origin')
-				currentLesson.getCurrentLesson(lessonName)
 				userGithub = CommitLive::Github.new()
 				netrc.read(machine: 'ga-extra')
 				username = netrc.login
@@ -122,7 +131,6 @@ module CommitLive
 							"#{username}:master",
 							"PR by #{username}"
 						)
-						puts "Lesson submitted successfully!"
 					end
 				rescue Octokit::Error => err
 					puts "Error while creating PR!"
@@ -140,7 +148,6 @@ module CommitLive
 			end
 
 			def update_lesson_status
-				lessonName = repo_name(remote: 'origin')
 				status.update('submitted_pull_request', lessonName)
 			end
 		end

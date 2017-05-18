@@ -28,9 +28,11 @@ module CommitLive
 			if !lessonData['current_track'].nil?
 				@lessonName = lessonData['current_track']['track_slug']
 				isAssignment = lessonData['current_track']['assignment_flag']
+				forked = lessonData['current_track']['forked']
 			else
 				@lessonName = lessonData['track_slug']
 				isAssignment = lessonData['assignment_flag']
+				forked = lessonData['forked']
 			end
 			if !isAssignment
 				puts "This is a read only lesson!"
@@ -44,7 +46,9 @@ module CommitLive
 				# change group owner
 				change_grp_owner
 				# lesson forked API change
-				lesson_status.update('forked', lessonName)
+				if !forked
+					lesson_status.update('forked', lessonName)
+				end
 			end
 			# install dependencies
 			# cd into it and invoke bash
