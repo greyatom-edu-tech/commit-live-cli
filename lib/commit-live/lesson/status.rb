@@ -1,6 +1,6 @@
 require "commit-live/api"
 require "commit-live/netrc-interactor"
-require 'uri'
+require "uri"
 
 module CommitLive
 	class Status

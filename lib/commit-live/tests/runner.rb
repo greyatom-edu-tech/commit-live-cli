@@ -1,7 +1,10 @@
-require 'yaml'
+require "yaml"
+require "oj"
+require "commit-live/lesson/current"
 require "commit-live/lesson/status"
+require "commit-live/api"
 require "commit-live/netrc-interactor"
-require 'commit-live/tests/strategies/python-test'
+require "commit-live/tests/strategies/python-test"
 
 module CommitLive
 	class Test
@@ -13,6 +16,7 @@ module CommitLive
 
 		def initialize()
 			check_lesson_dir
+			check_if_practice_lesson
 			die if !strategy
 		end
 
@@ -39,6 +43,10 @@ module CommitLive
 			url.match(/^.+[\w-]+\/(.*?)(?:\.git)?$/)[1]
 		end
 
+		def lesson_name
+			repo_name(remote: 'origin')
+		end
+
 		def put_error_msg
 			puts "It doesn't look like you're in a lesson directory."
 			puts 'Please cd into an appropriate directory and try again.'
@@ -51,15 +59,19 @@ module CommitLive
 			strategy.configure
 			results = strategy.run
 			if updateStatus
-				lessonName = repo_name(remote: 'origin')
 				if results
 					# test case passed
-					CommitLive::Status.new().update('test_case_pass', lessonName)
+					CommitLive::Status.new().update('test_case_pass', lesson_name)
 				else
 					# test case failed
-					CommitLive::Status.new().update('test_case_fail', lessonName)
+					CommitLive::Status.new().update('test_case_fail', lesson_name)
 				end
 			end
+			if strategy.results
+				dump_results
+			end
+			strategy.cleanup
+			puts 'Done.'
 			return results
 		end
 
@@ -72,6 +84,45 @@ module CommitLive
 		end
 
 		private
+
+		def check_if_practice_lesson
+			lesson = CommitLive::Current.new
+			lesson.getCurrentLesson(lesson_name)
+			lessonType = lesson.getValue('type')
+			if lessonType == "PRACTICE"
+				puts "This is a practice lesson. No need to run test on it."
+				exit 1
+			end
+		end
+
+		def dump_results
+			begin
+				Timeout::timeout(15) do
+					api = CommitLive::API.new
+					netrc = CommitLive::NetrcInteractor.new()
+					netrc.read
+					token = netrc.password
+					url = URI.escape("/v1/dumps")
+					response = api.post(
+						url,
+						headers: {
+							'access-token' => "#{token}",
+							'content-type' => 'application/json',
+						},
+						body: {
+							'data' => Oj.dump(strategy.results, mode: :compat),
+							'track_slug' => lesson_name
+						}
+					)
+					if response.status != 201
+						puts "Error while dumping test results."
+					end
+				end
+			rescue Timeout::Error
+				puts "Error while dumping test results."
+				exit
+			end
+		end
 
 		def strategies
 			[

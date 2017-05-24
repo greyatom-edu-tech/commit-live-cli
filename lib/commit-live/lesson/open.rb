@@ -7,9 +7,10 @@ require 'git'
 
 module CommitLive
 	class Open
-		attr_reader :lessonName, :rootDir, :lesson, :forkedRepo, :lesson_status
+		attr_reader :rootDir, :lesson, :forkedRepo, :lesson_status
 
 		HOME_DIR = File.expand_path("~")
+		ALLOWED_TYPES = ["LAB", "PRACTICE"]
 
 		def initialize()
 			if File.exists?("#{HOME_DIR}/.ga-config")
@@ -19,35 +20,52 @@ module CommitLive
 			@lesson_status = CommitLive::Status.new
 		end
 
+		def ssh_url
+			if lesson_type === "PRACTICE"
+				"git@github.com:#{lesson_repo}.git"
+			else
+				forkedRepo.ssh_url
+			end
+		end
+
+		def lesson_name
+			lesson.getValue('track_slug')
+		end
+
+		def lesson_type
+			lesson.getValue('type')
+		end
+
+		def lesson_forked
+			lesson.getValue('forked')
+		end
+
+		def lesson_repo
+			lesson.getValue('repo_url')
+		end
+
 		def openALesson(puzzle_name)
 			# get currently active lesson
 			puts "Getting current lesson..."
 			lesson.getCurrentLesson(puzzle_name)
-			lessonData = lesson.getAttr('data')
-			isAssignment = false;
-			if !lessonData['current_track'].nil?
-				@lessonName = lessonData['current_track']['track_slug']
-				isAssignment = lessonData['current_track']['assignment_flag']
-				forked = lessonData['current_track']['forked']
-			else
-				@lessonName = lessonData['track_slug']
-				isAssignment = lessonData['assignment_flag']
-				forked = lessonData['forked']
-			end
-			if !isAssignment
+
+			if !ALLOWED_TYPES.include? lesson_type
 				puts "This is a read only lesson!"
 				exit
 			end
-			if !File.exists?("#{rootDir}/#{lessonName}")
+
+			if !File.exists?("#{rootDir}/#{lesson_name}")
 				# fork lesson repo via github api
-				forkCurrentLesson
+				if lesson_type == "LAB"
+					forkCurrentLesson
+				end
 				# clone forked lesson into machine
 				cloneCurrentLesson
 				# change group owner
 				change_grp_owner
 				# lesson forked API change
-				if !forked
-					lesson_status.update('forked', lessonName)
+				if lesson_type == "LAB" && !lesson_forked
+					lesson_status.update('forked', lesson_name)
 				end
 			end
 			# install dependencies
@@ -60,13 +78,7 @@ module CommitLive
 			github = CommitLive::Github.new()
 			begin
 				Timeout::timeout(15) do
-					lessonData = lesson.getAttr('data')
-					if !lessonData['current_track'].nil?
-						lessonRepo = lessonData['current_track']['repo_url']
-					else
-						lessonRepo = lessonData['repo_url']
-					end
-					@forkedRepo = github.client.fork(lessonRepo)
+					@forkedRepo = github.client.fork(lesson_repo)
 				end
 			rescue Octokit::Error => err
 				puts "Error while forking!"
@@ -82,7 +94,7 @@ module CommitLive
 			puts "Cloning lesson..."
 			begin
 				Timeout::timeout(15) do
-					Git.clone(forkedRepo.ssh_url, lessonName, path: rootDir)
+					Git.clone(ssh_url, lesson_name, path: rootDir)
 				end
 			rescue Git::GitExecuteError => err
 				puts "Error while cloning!"
@@ -95,12 +107,12 @@ module CommitLive
 		end
 
 		def change_grp_owner
-			system("chgrp -R ubuntu #{rootDir}/#{lessonName}")
+			system("chgrp -R ubuntu #{rootDir}/#{lesson_name}")
 		end
 
 		def cdToLesson
 			puts "Opening lesson..."
-			Dir.chdir("#{rootDir}/#{lessonName}")
+			Dir.chdir("#{rootDir}/#{lesson_name}")
 			puts "Done."
 			exec("#{ENV['SHELL']} -l")
 		end

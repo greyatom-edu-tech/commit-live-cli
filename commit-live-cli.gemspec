@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "json", "~> 2.0", ">= 2.0.2"
   spec.add_runtime_dependency "git", "~> 1.3", ">= 1.3.0"
   spec.add_runtime_dependency "faraday", "~> 0.9"
+  spec.add_runtime_dependency "oj", "~> 2.9"
 end

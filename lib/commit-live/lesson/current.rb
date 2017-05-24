@@ -46,6 +46,15 @@ module CommitLive
 				lesson.fetch(attr)
 			end
 		end
+
+		def getValue(key)
+			lessonData = getAttr('data')
+			if !lessonData['current_track'].nil?
+				lessonData['current_track'][key]
+			else
+				lessonData[key]
+			end
+		end
 		
 	end
 end

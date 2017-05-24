@@ -24,9 +24,9 @@ module CommitLive
 			def commitAndPush
 				checkRemote
 
-				currentLesson.getCurrentLesson(lessonName)
-				lessonData = currentLesson.getAttr('data')
-				testCasePassed = lessonData['test_case_pass']
+				check_if_practice_lesson
+
+				testCasePassed = currentLesson.getValue('test_case_pass')
 				# Check if User passed test cases
 				if testCasePassed
 					# Push to User's Github
@@ -34,7 +34,7 @@ module CommitLive
 					commitChanges
 					push
 
-					pullRequestSubmitted = lessonData['submitted_pull_request']
+					pullRequestSubmitted = currentLesson.getValue('submitted_pull_request')
 					if !pullRequestSubmitted
 						# Create Pull Request
 						createPullRequest
@@ -50,6 +50,15 @@ module CommitLive
 			end
 
 			private
+
+			def check_if_practice_lesson
+				currentLesson.getCurrentLesson(lessonName)
+				lessonType = currentLesson.getValue('type')
+				if lessonType == "PRACTICE"
+					puts "This is a practice lesson. No need to submit anything."
+					exit 1
+				end
+			end
 
 			def setGit
 				begin
@@ -123,8 +132,7 @@ module CommitLive
 				username = netrc.login
 				begin
 					Timeout::timeout(45) do
-						lessonData = currentLesson.getAttr('data')
-						parentRepo = lessonData['repo_url']
+						parentRepo = currentLesson.getValue('repo_url')
 						pullRequest = userGithub.client.create_pull_request(
 							parentRepo,
 							'master',

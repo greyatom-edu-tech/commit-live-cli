@@ -12,7 +12,15 @@ module CommitLive
 			end
 
 			def run
-				system("nosetests --verbose")
+				system("nosetests --verbose --with-json --json-file=\"./.results.json\"")
+			end
+
+			def results
+				@output ||= Oj.load(File.read('.results.json'), mode: :compat)
+			end
+
+			def cleanup
+				FileUtils.rm('.results.json')
 			end
 		end
 	end
