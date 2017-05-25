@@ -89,12 +89,10 @@ module CommitLive
 			end
 
 			def addChanges
-				puts 'Adding changes...'
 				git.add(all: true)
 			end
 
 			def commitChanges
-				puts 'Committing changes...'
 				begin
 					git.commit('Done')
 				rescue Git::GitExecuteError => e

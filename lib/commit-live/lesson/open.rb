@@ -4,6 +4,7 @@ require "commit-live/api"
 require "commit-live/github"
 require 'octokit'
 require 'git'
+require "oj"
 
 module CommitLive
 	class Open
@@ -46,7 +47,7 @@ module CommitLive
 
 		def openALesson(puzzle_name)
 			# get currently active lesson
-			puts "Getting current lesson..."
+			puts "Getting lesson..."
 			lesson.getCurrentLesson(puzzle_name)
 
 			if !ALLOWED_TYPES.include? lesson_type
@@ -66,6 +67,9 @@ module CommitLive
 				# lesson forked API change
 				if lesson_type == "LAB" && !lesson_forked
 					lesson_status.update('forked', lesson_name)
+				end
+				if lesson_type == "PRACTICE"
+					open_lesson
 				end
 			end
 			# install dependencies
@@ -115,6 +119,34 @@ module CommitLive
 			Dir.chdir("#{rootDir}/#{lesson_name}")
 			puts "Done."
 			exec("#{ENV['SHELL']} -l")
+		end
+
+		def open_lesson
+			begin
+				Timeout::timeout(15) do
+					api = CommitLive::API.new("https://chat.commit.live")
+					netrc = CommitLive::NetrcInteractor.new()
+					netrc.read(machine: 'ga-extra')
+					username = netrc.login
+					url = URI.escape("/send/#{username}")
+					message = {
+						'type': 'open-lesson',
+						'title': lesson_name
+					}
+					response = api.post(
+						url,
+						headers: {
+							'content-type': 'application/json',
+						},
+						body: {
+							'message': Oj.dump(message, mode: :compat),
+						}
+					)
+				end
+			rescue Timeout::Error
+				puts "Open Lesson WebSocket call failed."
+				exit
+			end
 		end
 	end
 end

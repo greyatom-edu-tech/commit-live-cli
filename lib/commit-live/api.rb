@@ -5,8 +5,8 @@ module CommitLive
 	class API
 		attr_reader :conn
 
-		def initialize()
-			endpoint = CommitLive::Endpoint.new.get()
+		def initialize(api_url = nil)
+			endpoint = api_url || CommitLive::Endpoint.new.get()
 			@conn = Faraday.new(url: endpoint) do |faraday|
 				faraday.adapter Faraday.default_adapter
 			end

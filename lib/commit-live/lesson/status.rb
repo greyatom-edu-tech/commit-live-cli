@@ -12,7 +12,6 @@ module CommitLive
 		end
 
 		def update(type, trackName)
-			puts 'Updating lesson status...'
 			begin
 				Timeout::timeout(15) do
 					netrc.read

@@ -55,15 +55,19 @@ module CommitLive
 
 		def run(updateStatus = true)
 			clear_changes_in_tests
+			puts 'Testing lesson...'
 			strategy.check_dependencies
 			strategy.configure
 			results = strategy.run
 			if updateStatus
 				if results
 					# test case passed
+					puts 'Great! You have passed all the test cases.'
+					puts 'Use `clive submit` to push your changes.'
 					CommitLive::Status.new().update('test_case_pass', lesson_name)
 				else
 					# test case failed
+					puts 'Oops! You still have to pass all the test cases.'
 					CommitLive::Status.new().update('test_case_fail', lesson_name)
 				end
 			end
@@ -71,7 +75,6 @@ module CommitLive
 				dump_results
 			end
 			strategy.cleanup
-			puts 'Done.'
 			return results
 		end
 

@@ -50,7 +50,6 @@ module CommitLive
 
 		desc "test", "This will test you"
 		def test()
-			puts 'Testing...'
 			CommitLive::Test.new().run
 		end
 
