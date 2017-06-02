@@ -1,13 +1,15 @@
 require "commit-live/api"
 require "commit-live/netrc-interactor"
-require 'json'
+require "commit-live/sentry"
+require "json"
 
 module CommitLive
 	class Current
-		attr_accessor :lesson, :netrc
+		attr_accessor :lesson, :netrc, :sentry
 
 		def initialize()
 			@netrc = CommitLive::NetrcInteractor.new()
+			@sentry = CommitLive::Sentry.new()
 		end
 
 		def getCurrentLesson(puzzle_name)
@@ -18,11 +20,14 @@ module CommitLive
 			getLesson(url)
 		end
 
+		def token
+			netrc.read
+			netrc.password
+		end
+
 		def getLesson(url)
 			begin
 				Timeout::timeout(15) do
-					netrc.read
-					token = netrc.password
 					response = CommitLive::API.new().get(
 						url,
 						headers: { 'access-token' => "#{token}" }
@@ -30,8 +35,12 @@ module CommitLive
 					if response.status == 200
 						@lesson = JSON.parse(response.body)
 					else
-						puts "Something went wrong. Please try again."
-						exit 1
+						sentry.log_message("Get Lesson Failed",
+							{
+								'url' => url,
+								'response' => response.body
+							}
+						)
 					end
 				end
 			rescue Timeout::Error

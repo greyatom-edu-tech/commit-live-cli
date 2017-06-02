@@ -3,12 +3,13 @@ require "oj"
 require "commit-live/lesson/current"
 require "commit-live/lesson/status"
 require "commit-live/api"
+require "commit-live/sentry"
 require "commit-live/netrc-interactor"
 require "commit-live/tests/strategies/python-test"
 
 module CommitLive
 	class Test
-		attr_reader :git
+		attr_reader :git, :sentry
 
 		REPO_BELONGS_TO_US = [
 			'commit-live-students'
@@ -18,6 +19,7 @@ module CommitLive
 			check_lesson_dir
 			check_if_practice_lesson
 			die if !strategy
+			@sentry = CommitLive::Sentry.new()
 		end
 
 		def set_git
@@ -118,7 +120,13 @@ module CommitLive
 						}
 					)
 					if response.status != 201
-						puts "Error while dumping test results."
+						sentry.log_message("Test Results Dump Failed",
+							{
+								'url' => url,
+								'track_slug' => lesson_name,
+								'results' => strategy.results
+							}
+						)
 					end
 				end
 			rescue Timeout::Error

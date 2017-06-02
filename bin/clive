@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'commit-live'
+require "commit-live"
 
 if ['-v', '--version'].include?(ARGV.first)
 	puts CommitLive::Cli::VERSION

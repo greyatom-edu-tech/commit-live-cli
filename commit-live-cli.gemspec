@@ -1,7 +1,7 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'commit-live/version'
+require "commit-live/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "commit-live-cli"
@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "git", "~> 1.3", ">= 1.3.0"
   spec.add_runtime_dependency "faraday", "~> 0.9"
   spec.add_runtime_dependency "oj", "~> 2.9"
+  spec.add_runtime_dependency "sentry-raven", "~> 2.5"
 end

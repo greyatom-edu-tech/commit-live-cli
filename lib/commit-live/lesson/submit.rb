@@ -1,5 +1,5 @@
-require 'commit-live/lesson/git-helper'
-require 'octokit'
+require "commit-live/lesson/git-helper"
+require "octokit"
 
 module CommitLive
 	class Submit

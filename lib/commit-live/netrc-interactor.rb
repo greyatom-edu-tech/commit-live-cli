@@ -1,4 +1,4 @@
-require 'netrc'
+require "netrc"
 
 module CommitLive
 	class NetrcInteractor

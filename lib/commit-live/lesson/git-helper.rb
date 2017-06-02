@@ -2,11 +2,12 @@ require "commit-live/lesson/current"
 require "commit-live/lesson/status"
 require "commit-live/netrc-interactor"
 require "commit-live/github"
+require "commit-live/sentry"
 
 module CommitLive
 	class Submit
 		class GitHelper
-			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName
+			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName, :sentry
 			attr_accessor :remote_name
 
 			REPO_BELONGS_TO_US = [
@@ -19,6 +20,7 @@ module CommitLive
 				@currentLesson = CommitLive::Current.new
 				@status = CommitLive::Status.new
 				@lessonName = repo_name(remote: 'origin')
+				@sentry = CommitLive::Sentry.new()
 			end
 
 			def commitAndPush
@@ -114,9 +116,12 @@ module CommitLive
 						git.push(push_remote)
 					end
 				rescue Git::GitExecuteError => e
-					puts 'There was an error while pushing. Please try again later.'
-					puts e.message
-					exit 1
+					sentry.log_exception(e,
+						{
+							'event': 'pushing',
+							'lesson_name' => lessonName,
+						}
+					)
 				rescue Timeout::Error
 					puts "Can't reach GitHub right now. Please try again."
 					exit 1
@@ -139,9 +144,12 @@ module CommitLive
 						)
 					end
 				rescue Octokit::Error => err
-					puts "Error while creating PR!"
-					puts err
-					exit 1
+					sentry.log_exception(err,
+						{
+							'event': 'creating-pull-request',
+							'lesson_name' => lessonName,
+						}
+					)
 				rescue Timeout::Error
 					puts "Please check your internet connection."
 					exit 1

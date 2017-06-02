@@ -1,4 +1,4 @@
-require 'commit-live/tests/strategy'
+require "commit-live/tests/strategy"
 
 module CommitLive
 	module Strategies
@@ -20,7 +20,9 @@ module CommitLive
 			end
 
 			def cleanup
-				FileUtils.rm('.results.json')
+				if File.exists?('.results.json')
+					FileUtils.rm('.results.json')
+				end
 			end
 		end
 	end

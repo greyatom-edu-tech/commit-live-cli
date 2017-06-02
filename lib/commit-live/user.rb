@@ -1,7 +1,7 @@
 require "commit-live/api"
 require "commit-live/netrc-interactor"
-require 'json'
-require 'yaml'
+require "json"
+require "yaml"
 
 module CommitLive
 	class User

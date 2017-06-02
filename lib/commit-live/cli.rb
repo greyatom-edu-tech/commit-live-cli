@@ -1,10 +1,10 @@
-require 'commit-live/user'
-require 'commit-live/netrc-interactor'
-require 'commit-live/tests/runner'
-require 'commit-live/lesson/submit'
-require 'commit-live/lesson/open'
-require 'commit-live/lesson/parser'
-require 'thor'
+require "commit-live/user"
+require "commit-live/netrc-interactor"
+require "commit-live/tests/runner"
+require "commit-live/lesson/submit"
+require "commit-live/lesson/open"
+require "commit-live/lesson/parser"
+require "thor"
 
 module CommitLive
 	class CLI < Thor

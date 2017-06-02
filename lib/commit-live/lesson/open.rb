@@ -2,13 +2,14 @@ require "commit-live/lesson/current"
 require "commit-live/lesson/status"
 require "commit-live/api"
 require "commit-live/github"
-require 'octokit'
-require 'git'
+require "commit-live/sentry"
+require "octokit"
+require "git"
 require "oj"
 
 module CommitLive
 	class Open
-		attr_reader :rootDir, :lesson, :forkedRepo, :lesson_status
+		attr_reader :rootDir, :lesson, :forkedRepo, :lesson_status, :sentry
 
 		HOME_DIR = File.expand_path("~")
 		ALLOWED_TYPES = ["LAB", "PRACTICE"]
@@ -19,6 +20,7 @@ module CommitLive
 			end
 			@lesson = CommitLive::Current.new
 			@lesson_status = CommitLive::Status.new
+			@sentry = CommitLive::Sentry.new()
 		end
 
 		def ssh_url
@@ -85,9 +87,12 @@ module CommitLive
 					@forkedRepo = github.client.fork(lesson_repo)
 				end
 			rescue Octokit::Error => err
-				puts "Error while forking!"
-				puts err
-				exit
+				sentry.log_exception(err,
+					{
+						'event': 'forking',
+						'lesson_name' => lesson_name,
+					}
+				)
 			rescue Timeout::Error
 				puts "Please check your internet connection."
 				exit
@@ -101,9 +106,12 @@ module CommitLive
 					Git.clone(ssh_url, lesson_name, path: rootDir)
 				end
 			rescue Git::GitExecuteError => err
-				puts "Error while cloning!"
-				puts err
-				exit
+				sentry.log_exception(err,
+					{
+						'event': 'cloning',
+						'lesson_name' => lesson_name,
+					}
+				)
 			rescue Timeout::Error
 				puts "Cannot clone this lesson right now. Please try again."
 				exit

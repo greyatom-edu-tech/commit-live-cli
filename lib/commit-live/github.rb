@@ -1,5 +1,5 @@
 require "commit-live/netrc-interactor"
-require 'octokit'
+require "octokit"
 
 module CommitLive
 	class Github
