@@ -30,8 +30,8 @@ module CommitLive
 			user_info.merge(other_args)
 		end
 
-		def log_message(other_args)
-			Raven.capture_message("Get Lesson Failed",
+		def log_message(message, other_args)
+			Raven.capture_message(message,
 				:extra => merge_user_info_with_other_args(other_args)
 			)
 			puts "Something went wrong. Commit.Live Admin has been notified about the issue. Please wait until further instructions."
