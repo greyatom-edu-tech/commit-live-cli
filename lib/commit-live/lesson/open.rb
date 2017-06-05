@@ -126,6 +126,12 @@ module CommitLive
 			puts "Opening lesson..."
 			Dir.chdir("#{rootDir}/#{lesson_name}")
 			puts "Done."
+			if File.exists?("#{HOME_DIR}/.lastdirectory")
+				filename = "#{HOME_DIR}/.lastdirectory"
+				File.open(filename, 'w') do |out|
+					out << "#{rootDir}/#{lesson_name}"
+				end
+			end
 			exec("#{ENV['SHELL']} -l")
 		end
 

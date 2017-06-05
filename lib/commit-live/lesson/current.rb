@@ -34,11 +34,15 @@ module CommitLive
 					)
 					if response.status == 200
 						@lesson = JSON.parse(response.body)
+					elsif response.status == 404
+						puts "Oops you are trying to access a non-existent lesson."
+						exit
 					else
 						sentry.log_message("Get Lesson Failed",
 							{
 								'url' => url,
-								'response' => response.body
+								'response-body' => response.body,
+								'response-status' => response.status
 							}
 						)
 					end

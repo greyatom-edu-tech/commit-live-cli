@@ -38,7 +38,9 @@ module CommitLive
 								'params' => {
 									'method' => 'assignment_status',
 									'action' => type
-								}
+								},
+								'response-body' => response.body,
+								'response-status' => response.status
 							}
 						)
 					end

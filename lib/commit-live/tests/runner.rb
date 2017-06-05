@@ -124,7 +124,9 @@ module CommitLive
 							{
 								'url' => url,
 								'track_slug' => lesson_name,
-								'results' => strategy.results
+								'results' => strategy.results,
+								'response-body' => response.body,
+								'response-status' => response.status
 							}
 						)
 					end
