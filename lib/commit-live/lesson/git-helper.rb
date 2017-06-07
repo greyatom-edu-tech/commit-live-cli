@@ -108,6 +108,10 @@ module CommitLive
 				end
 			end
 
+			def rollback_last_commit
+				system("git reset HEAD~1")
+			end
+
 			def push()
 				puts 'Pushing changes to GitHub...'
 				push_remote = git.remote(self.remote_name)
@@ -116,6 +120,7 @@ module CommitLive
 						git.push(push_remote)
 					end
 				rescue Git::GitExecuteError => e
+					rollback_last_commit()
 					sentry.log_exception(e,
 						{
 							'event': 'pushing',
