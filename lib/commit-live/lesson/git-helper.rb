@@ -112,6 +112,19 @@ module CommitLive
 				system("git reset HEAD~1")
 			end
 
+			def pull_changes
+				begin
+					Timeout::timeout(15) do
+						git.pull
+						puts "Now you will have to run `clive submit` again."
+						exit 1
+					end
+				rescue Timeout::Error
+					puts "Can't reach GitHub right now. Please try again."
+					exit 1
+				end
+			end
+
 			def push()
 				puts 'Pushing changes to GitHub...'
 				push_remote = git.remote(self.remote_name)
@@ -121,12 +134,18 @@ module CommitLive
 					end
 				rescue Git::GitExecuteError => e
 					rollback_last_commit()
-					sentry.log_exception(e,
-						{
-							'event': 'pushing',
-							'lesson_name' => lessonName,
-						}
-					)
+					if e.message.match(/You may want to first integrate the remote changes/)
+						puts "It seems that you have made changes to the assignment outside of our IDE."
+						puts "Pulling the changes..."
+						pull_changes
+					else
+						sentry.log_exception(e,
+							{
+								'event': 'pushing',
+								'lesson_name' => lessonName,
+							}
+						)
+					end
 				rescue Timeout::Error
 					puts "Can't reach GitHub right now. Please try again."
 					exit 1
@@ -149,12 +168,14 @@ module CommitLive
 						)
 					end
 				rescue Octokit::Error => err
-					sentry.log_exception(err,
-						{
-							'event': 'creating-pull-request',
-							'lesson_name' => lessonName,
-						}
-					)
+					if !err.message.match(/A pull request already exists/)
+						sentry.log_exception(err,
+							{
+								'event': 'creating-pull-request',
+								'lesson_name' => lessonName,
+							}
+						)
+					end
 				rescue Timeout::Error
 					puts "Please check your internet connection."
 					exit 1
