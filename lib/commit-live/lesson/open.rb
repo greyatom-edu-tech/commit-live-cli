@@ -110,6 +110,7 @@ module CommitLive
 					{
 						'event': 'cloning',
 						'lesson_name' => lesson_name,
+						'current-directory' => Dir.pwd
 					}
 				)
 			rescue Timeout::Error
