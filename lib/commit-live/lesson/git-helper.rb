@@ -134,7 +134,7 @@ module CommitLive
 					end
 				rescue Git::GitExecuteError => e
 					rollback_last_commit()
-					if e.message.match(/Integrate the remote changes/)
+					if e.message.match(/(e.g., 'git pull ...')/)
 						puts "There are some remote changes to pull."
 						puts "Pulling the changes..."
 						pull_changes
