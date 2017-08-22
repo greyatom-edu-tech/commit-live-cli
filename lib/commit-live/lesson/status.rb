@@ -19,9 +19,9 @@ module CommitLive
 		end
 
 		def update(type, trackName)
+			enc_url = URI.escape("/v1/user/track/#{trackName}")
 			begin
-				Timeout::timeout(15) do
-					enc_url = URI.escape("/v1/user/track/#{trackName}")
+				Timeout::timeout(60) do
 					response = api.post(
 						enc_url,
 						headers: { 'access-token' => "#{token}" },
@@ -47,8 +47,16 @@ module CommitLive
 				end
 			rescue Timeout::Error
 				puts "Error while updating lesson status."
-				puts "Please check your internet connection."
-				exit
+				sentry.log_message("Update Lesson Status Failed",
+					{
+						'url' => enc_url,
+						'track_name' => trackName,
+						'params' => {
+							'method' => 'assignment_status',
+							'action' => type
+						},
+					}
+				)
 			end
 		end
 	end

@@ -100,7 +100,7 @@ module CommitLive
 				rescue Git::GitExecuteError => e
 					if e.message.match(/nothing to commit/)
 						puts "It looks like you have no changes to commit."
-						exit 1
+						puts "Pushing previous commits if any."
 					else
 						puts 'Sorry, something went wrong. Please try again.'
 						exit 1
@@ -134,8 +134,8 @@ module CommitLive
 					end
 				rescue Git::GitExecuteError => e
 					rollback_last_commit()
-					if e.message.match(/You may want to first integrate the remote changes/)
-						puts "It seems that you have made changes to the assignment outside of our IDE."
+					if e.message.match(/Integrate the remote changes/)
+						puts "There are some remote changes to pull."
 						puts "Pulling the changes..."
 						pull_changes
 					else

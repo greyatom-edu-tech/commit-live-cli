@@ -73,6 +73,8 @@ module CommitLive
 				if lesson_type == "PRACTICE"
 					open_lesson
 				end
+			else
+				open_lesson
 			end
 			# install dependencies
 			# cd into it and invoke bash
