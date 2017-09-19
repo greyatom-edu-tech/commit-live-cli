@@ -74,6 +74,7 @@ module CommitLive
 				end
 			end
 			if strategy.results
+				strategy.print_results
 				dump_results
 			end
 			strategy.cleanup
