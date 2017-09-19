@@ -13,12 +13,13 @@ module CommitLive
 			end
 
 			def run
-				system("nosetests --verbose --with-json --json-file=\"./.results.json\" > /dev/null")
+				system("nosetests --verbose --with-json --json-file=\"./.results.json\" &>/dev/null")
 				print_results
 			end
 
 			def print_results
-				output["results"].each do |value|
+				test_results = results
+				test_results["results"].each do |value|
 					rows << [value["name"], value["type"]]
 				end
 				table = Terminal::Table.new :headings => ['Test Case', 'Status'], :rows => rows
