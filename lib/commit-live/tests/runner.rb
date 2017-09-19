@@ -62,7 +62,7 @@ module CommitLive
 			strategy.configure
 			results = strategy.run
 			if updateStatus
-				if $? == 0
+				if results
 					# test case passed
 					puts 'Great! You have passed all the test cases.'
 					puts 'Use `clive submit` to push your changes.'
@@ -74,7 +74,6 @@ module CommitLive
 				end
 			end
 			if strategy.results
-				strategy.print_results
 				dump_results
 			end
 			strategy.cleanup

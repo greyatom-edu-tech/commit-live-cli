@@ -108,17 +108,13 @@ module CommitLive
 					Git.clone(ssh_url, lesson_name, path: rootDir)
 				end
 			rescue Git::GitExecuteError => err
-				if err.message.match(/already exists and is not an empty directory/)
-					puts "Skipping cloning, as `#{lesson_name}` already exists."
-				else
-					sentry.log_exception(err,
-						{
-							'event': 'cloning',
-							'lesson_name' => lesson_name,
-							'current-directory' => Dir.pwd
-						}
-					)
-				end
+				sentry.log_exception(err,
+					{
+						'event': 'cloning',
+						'lesson_name' => lesson_name,
+						'current-directory' => Dir.pwd
+					}
+				)
 			rescue Timeout::Error
 				puts "Cannot clone this lesson right now. Please try again."
 				exit
