@@ -18,6 +18,7 @@ module CommitLive
 			end
 
 			def print_results
+				rows = []
 				test_results = results
 				test_results["results"].each do |value|
 					rows << [value["name"], value["type"]]
