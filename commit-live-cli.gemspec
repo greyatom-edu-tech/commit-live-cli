@@ -32,4 +32,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "faraday", "~> 0.9"
   spec.add_runtime_dependency "oj", "~> 2.9"
   spec.add_runtime_dependency "sentry-raven", "~> 2.5"
+  spec.add_runtime_dependency "terminal-table", "~> 1.8"
 end
