@@ -61,6 +61,9 @@ module CommitLive
 			strategy.check_dependencies
 			strategy.configure
 			results = strategy.run
+			if strategy.results
+				strategy.print_results
+			end
 			if updateStatus
 				if results
 					# test case passed
