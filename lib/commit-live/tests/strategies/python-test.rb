@@ -19,12 +19,29 @@ module CommitLive
 			def print_results
 				if File.exists?('.results.json')
 					rows = []
+					totalPassed = 0
+					totalFailed = 0
 					test_results = results
+					columns = ['Test Case', 'Status']
 					test_results["results"].each do |value|
-						rows << [value["name"], value["type"]]
+						newRow = [value["name"], value["type"]]
+						isErrorOrFail = value['type'] == 'failure' || value['type'] == 'error'
+						totalFailed += 1 if isErrorOrFail
+						newRow << value['message'] if isErrorOrFail
+						totalPassed += 1 if value['type'] == 'success'
+						rows << newRow
 					end
-					table = Terminal::Table.new :headings => ['Test Case', 'Status'], :rows => rows
+					if totalFailed > 0
+						columns << 'Message'
+					end
+					table = Terminal::Table.new do |t|
+						t.headings = columns
+						t.rows = rows
+						t.style = { :all_separators => true }
+					end
 					puts table
+					puts "Total Passed: #{totalPassed}"
+					puts "Total Failed: #{totalFailed}"
 				end
 			end
 
