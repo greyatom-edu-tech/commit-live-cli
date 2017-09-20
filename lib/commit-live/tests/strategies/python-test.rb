@@ -13,7 +13,9 @@ module CommitLive
 			end
 
 			def run
-				system("nosetests --verbose --with-json --json-file=\"./.results.json\"")
+				system("nosetests --verbose --with-json --json-file=\"./.results.json\" &>/dev/null")
+				print_results
+				return $? == 0
 			end
 
 			def print_results
