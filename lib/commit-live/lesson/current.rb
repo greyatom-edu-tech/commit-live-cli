@@ -13,11 +13,11 @@ module CommitLive
 		end
 
 		def getCurrentLesson(puzzle_name)
-			url = '/v1/current_track'
-			if !puzzle_name.empty?
-				url = "/v1/user/track/#{puzzle_name}"
+			if puzzle_name.empty?
+				puts "Please specify a Track Slug"
+				exit
 			end
-			getLesson(url)
+			getLesson(puzzle_name)
 		end
 
 		def token
@@ -25,12 +25,12 @@ module CommitLive
 			netrc.password
 		end
 
-		def getLesson(url)
+		def getLesson(track_slug)
 			begin
 				Timeout::timeout(15) do
 					response = CommitLive::API.new().get(
-						url,
-						headers: { 'access-token' => "#{token}" }
+						"/v2/user/track/#{track_slug}",
+						headers: { 'Authorization' => "#{token}" }
 					)
 					if response.status == 200
 						@lesson = JSON.parse(response.body)
@@ -40,7 +40,7 @@ module CommitLive
 					else
 						sentry.log_message("Get Lesson Failed",
 							{
-								'url' => url,
+								'url' => "/v2/user/track/#{track_slug}",
 								'response-body' => response.body,
 								'response-status' => response.status
 							}
@@ -62,11 +62,7 @@ module CommitLive
 
 		def getValue(key)
 			lessonData = getAttr('data')
-			if !lessonData['current_track'].nil?
-				lessonData['current_track'][key]
-			else
-				lessonData[key]
-			end
+			lessonData[key]
 		end
 		
 	end

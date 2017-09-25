@@ -19,18 +19,20 @@ module CommitLive
 		end
 
 		def update(type, trackName)
-			enc_url = URI.escape("/v1/user/track/#{trackName}")
+			enc_url = URI.escape("/v2/user/track/#{trackName}")
 			begin
 				Timeout::timeout(60) do
 					response = api.post(
 						enc_url,
-						headers: { 'access-token' => "#{token}" },
-						params: { 
-							'method' => 'assignment_status',
+						headers: {
+							'Authorization' => "#{token}",
+							'Content-Type' => 'application/json'
+						},
+						body: {
 							'action' => type
 						}
 					)
-					if response.status != 202
+					if response.status != 201
 						sentry.log_message("Update Lesson Status Failed",
 							{
 								'url' => enc_url,

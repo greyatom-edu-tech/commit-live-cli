@@ -13,13 +13,13 @@ module CommitLive
 	      	@netrc = CommitLive::NetrcInteractor.new()
 	    end
 
-		def validate(token)
+		def validate(userID, token)
 			puts "Authenticating..."
 			begin
 				Timeout::timeout(15) do
 					response = CommitLive::API.new().get(
-						"/v1/users/#{token}", 
-						headers: { 'access-token' => "#{token}" }
+						"/v2/users/#{userID}",
+						headers: { 'Authorization' => "#{token}" }
 					)
 					if response.status == 200
 						# Save valid user details in netrc
@@ -50,10 +50,10 @@ module CommitLive
 
 		def save(userDetails, token)
 			user_data = userDetails.fetch('data')
-			username = user_data['username']
-			github_uid = user_data['id']
-			netrc.write(new_login: 'greyatom', new_password: token)
-			netrc.write(machine: 'ga-extra', new_login: username, new_password: github_uid)
+			username = user_data['userName']
+			userID = user_data['id']
+			netrc.write(new_login: userID, new_password: token)
+			netrc.write(machine: 'ga-extra', new_login: username, new_password: userID)
 			welcome(username)
 		end
 

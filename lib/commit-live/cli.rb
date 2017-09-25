@@ -18,7 +18,13 @@ module CommitLive
 			# Check if token already present
 			login, password = CommitLive::NetrcInteractor.new().read
 			if login.nil? || password.nil?
-				print 'Enter your github token here and press [ENTER]: '
+				print 'Enter User-ID here and press [ENTER]: '
+				login = STDIN.gets.chomp
+				if login.empty?
+					puts "No User-ID provided."
+					exit
+				end
+				print 'Enter Access token here and press [ENTER]: '
 				password = STDIN.gets.chomp
 				if password.empty?
 					puts "No token provided."
@@ -27,7 +33,7 @@ module CommitLive
 			end
 			# Check if token is valid
 			user = CommitLive::User.new()
-			user.validate(password)
+			user.validate(login, password)
 			user.setDefaultWorkspace
 		end
 

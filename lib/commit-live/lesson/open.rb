@@ -12,7 +12,7 @@ module CommitLive
 		attr_reader :rootDir, :lesson, :forkedRepo, :lesson_status, :sentry
 
 		HOME_DIR = File.expand_path("~")
-		ALLOWED_TYPES = ["LAB", "PRACTICE"]
+		ALLOWED_TYPES = ["CODE", "PRACTICE"]
 
 		def initialize()
 			if File.exists?("#{HOME_DIR}/.ga-config")
@@ -32,7 +32,11 @@ module CommitLive
 		end
 
 		def lesson_name
-			lesson.getValue('track_slug')
+			lesson.getValue('titleSlug')
+		end
+
+		def track_slug
+			lesson.getValue('titleSlugTestCase')
 		end
 
 		def lesson_type
@@ -40,11 +44,17 @@ module CommitLive
 		end
 
 		def lesson_forked
-			lesson.getValue('forked')
+			forked = lesson.getValue('forked')
+			!forked.nil? && forked == 1
+		end
+
+		def is_project
+			isProject = lesson.getValue('isProject')
+			!isProject.nil? && isProject == 1
 		end
 
 		def lesson_repo
-			lesson.getValue('repo_url')
+			lesson.getValue('repoUrl')
 		end
 
 		def openALesson(puzzle_name)
@@ -59,7 +69,7 @@ module CommitLive
 
 			if !File.exists?("#{rootDir}/#{lesson_name}")
 				# fork lesson repo via github api
-				if lesson_type == "LAB"
+				if lesson_type == "CODE"
 					forkCurrentLesson
 				end
 				# clone forked lesson into machine
@@ -67,8 +77,8 @@ module CommitLive
 				# change group owner
 				change_grp_owner
 				# lesson forked API change
-				if lesson_type == "LAB" && !lesson_forked
-					lesson_status.update('forked', lesson_name)
+				if !is_project && lesson_type == "CODE" && !lesson_forked
+					lesson_status.update('forked', track_slug)
 				end
 				if lesson_type == "PRACTICE"
 					open_lesson
