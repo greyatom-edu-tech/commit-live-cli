@@ -13,7 +13,7 @@ module CommitLive
 			puts "Hello World!"
 		end
 
-		desc "setup", "This will ask for token"
+		desc "setup", "This will ask for your User-ID & Access Token"
 		def setup(retries: 5)
 			# Check if token already present
 			login, password = CommitLive::NetrcInteractor.new().read
@@ -42,8 +42,8 @@ module CommitLive
 			CommitLive::User.new().confirmAndReset
 		end
 
-		desc "open", "This will fork new work"
-		def open(*puzzle_name)
+		desc "open <track-slug>", "This will fork given assignment. (for eg. clive open <track-slug>)"
+		def open(puzzle_name)
 			# Fork and Clone User's current lesson
 			lab_name = CommitLive::Puzzle::Parser.new(puzzle_name.join(' ')).parse!
 			CommitLive::Open.new().openALesson(lab_name)
@@ -54,9 +54,9 @@ module CommitLive
 			CommitLive::Submit.new().run
 		end
 
-		desc "test", "This will test you"
-		def test()
-			CommitLive::Test.new().run
+		desc "test <track-slug>", "This will test your assignment. (for eg. clive test <track-slug>)"
+		def test(lab_name)
+			CommitLive::Test.new(lab_name).run
 		end
 
 		desc 'version, -v, --version', 'Display the current version of the CommitLive gem'

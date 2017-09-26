@@ -12,8 +12,8 @@ module CommitLive
 				@files ||= Dir.entries('.')
 			end
 
-			def run
-				system("nosetests --verbose --with-json --json-file=\"./.results.json\" > /dev/null 2>&1")
+			def run(dir)
+				system("nosetests #{dir} --verbose --with-json --json-file=\"./.results.json\" > /dev/null 2>&1")
 			end
 
 			def print_results

@@ -9,17 +9,22 @@ require "commit-live/tests/strategies/python-test"
 
 module CommitLive
 	class Test
-		attr_reader :git, :sentry
+		attr_reader :git, :sentry, :track_slug, :lesson, :rootDir
 
+		HOME_DIR = File.expand_path("~")
 		REPO_BELONGS_TO_US = [
 			'commit-live-students'
 		]
 
-		def initialize()
+		def initialize(trackSlug)
+			@track_slug = trackSlug
 			check_lesson_dir
 			check_if_practice_lesson
 			die if !strategy
 			@sentry = CommitLive::Sentry.new()
+			if File.exists?("#{HOME_DIR}/.ga-config")
+				@rootDir = YAML.load(File.read("#{HOME_DIR}/.ga-config"))[:workspace]
+			end
 		end
 
 		def set_git
@@ -60,7 +65,7 @@ module CommitLive
 			puts 'Testing lesson...'
 			strategy.check_dependencies
 			strategy.configure
-			results = strategy.run
+			results = strategy.run(test_case_dir_path)
 			if strategy.results
 				strategy.print_results
 			end
@@ -69,15 +74,15 @@ module CommitLive
 					# test case passed
 					puts 'Great! You have passed all the test cases.'
 					puts 'Use `clive submit` to push your changes.'
-					CommitLive::Status.new().update('test_case_pass', lesson_name)
+					CommitLive::Status.new().update('testCasesPassed', track_slug)
 				else
 					# test case failed
 					puts 'Oops! You still have to pass all the test cases.'
-					CommitLive::Status.new().update('test_case_fail', lesson_name)
+					CommitLive::Status.new().update('testCasesFailed', track_slug)
 				end
 			end
 			if strategy.results
-				dump_results
+				# dump_results
 			end
 			strategy.cleanup
 			return results
@@ -88,17 +93,43 @@ module CommitLive
 		end
 
 		def clear_changes_in_tests
-			system("git checkout HEAD -- tests/")
+			system("git checkout HEAD -- #{test_case_dir_path}")
+		end
+
+		def test_case_dir_path
+			filePath = ""
+			filePath += "#{title_slug}/" if is_project_assignment
+			filePath += "tests/"
+			return filePath
+		end
+
+		def title_slug
+			lesson.getValue('titleSlug')
+		end
+
+		def is_project_assignment
+			isProjectAssignment = lesson.getValue('isProjectAssignment')
+			!isProjectAssignment.nil? && isProjectAssignment == 1
+		end
+
+		def is_project
+			isProject = lesson.getValue('isProject')
+			!isProject.nil? && isProject == 1
+		end
+
+		def is_practice
+			lessonType = lesson.getValue('type')
+			!lessonType.nil? && lessonType == "PRACTICE"
 		end
 
 		private
 
 		def check_if_practice_lesson
-			lesson = CommitLive::Current.new
-			lesson.getCurrentLesson(lesson_name)
-			lessonType = lesson.getValue('type')
-			if lessonType == "PRACTICE"
-				puts "This is a practice lesson. No need to run test on it."
+			@lesson = CommitLive::Current.new
+			lesson.getCurrentLesson(track_slug)
+			if is_project || is_practice
+				puts 'This is a Project. Go to individual assignments and follow intructions given on how to pass test cases for them.' if is_project
+				puts 'This is a Practice Lesson. No need to run tests on it.' if is_practice
 				exit 1
 			end
 		end
@@ -110,23 +141,23 @@ module CommitLive
 					netrc = CommitLive::NetrcInteractor.new()
 					netrc.read
 					token = netrc.password
-					url = URI.escape("/v1/dumps")
+					url = URI.escape("/v2/dumps")
 					response = api.post(
 						url,
 						headers: {
-							'access-token' => "#{token}",
-							'content-type' => 'application/json',
+							'Authorization' => "#{token}",
+							'Content-Type' => 'application/json',
 						},
 						body: {
 							'data' => Oj.dump(strategy.results, mode: :compat),
-							'track_slug' => lesson_name
+							'titleSlugTestCase' => track_slug
 						}
 					)
 					if response.status != 201
 						sentry.log_message("Test Results Dump Failed",
 							{
 								'url' => url,
-								'track_slug' => lesson_name,
+								'track-slug' => track_slug,
 								'results' => strategy.results,
 								'response-body' => response.body,
 								'response-status' => response.status

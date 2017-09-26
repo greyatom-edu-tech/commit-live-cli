@@ -13,10 +13,6 @@ module CommitLive
 		end
 
 		def getCurrentLesson(puzzle_name)
-			if puzzle_name.empty?
-				puts "Please specify a Track Slug"
-				exit
-			end
 			getLesson(puzzle_name)
 		end
 
