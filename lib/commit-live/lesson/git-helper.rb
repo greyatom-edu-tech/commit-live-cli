@@ -7,14 +7,15 @@ require "commit-live/sentry"
 module CommitLive
 	class Submit
 		class GitHelper
-			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName, :sentry
+			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName, :sentry, :track_slug
 			attr_accessor :remote_name
 
 			REPO_BELONGS_TO_US = [
 				'commit-live-students'
 			]
 
-			def initialize()
+			def initialize(trackSlug)
+				@track_slug = trackSlug
 				@git = setGit
 				@netrc = CommitLive::NetrcInteractor.new()
 				@currentLesson = CommitLive::Current.new
@@ -25,19 +26,15 @@ module CommitLive
 
 			def commitAndPush
 				checkRemote
-
 				check_if_practice_lesson
-
-				testCasePassed = currentLesson.getValue('test_case_pass')
 				# Check if User passed test cases
-				if testCasePassed
+				if is_test_case_passed
 					# Push to User's Github
 					addChanges
 					commitChanges
 					push
 
-					pullRequestSubmitted = currentLesson.getValue('submitted_pull_request')
-					if !pullRequestSubmitted
+					if !is_submitted_pr
 						# Create Pull Request
 						createPullRequest
 						update_lesson_status
@@ -53,11 +50,35 @@ module CommitLive
 
 			private
 
-			def check_if_practice_lesson
-				currentLesson.getCurrentLesson(lessonName)
+			def is_test_case_passed
+				isTestCasesPassed = currentLesson.getValue('testCasesPassed')
+				!isTestCasesPassed.nil? && isTestCasesPassed == 1
+			end
+
+			def is_submitted_pr
+				isSubmittedPr = currentLesson.getValue('submittedPr')
+				!isSubmittedPr.nil? && isSubmittedPr == 1
+			end
+
+			def is_project
+				isProject = currentLesson.getValue('isProject')
+				!isProject.nil? && isProject == 1
+			end
+
+			def is_practice
 				lessonType = currentLesson.getValue('type')
-				if lessonType == "PRACTICE"
-					puts "This is a practice lesson. No need to submit anything."
+				!lessonType.nil? && lessonType == "PRACTICE"
+			end
+
+			def repo_url
+				currentLesson.getValue('repoUrl')
+			end
+
+			def check_if_practice_lesson
+				currentLesson.getCurrentLesson(track_slug)
+				if is_project || is_practice
+					puts 'This is a Project. Go to individual assignments and follow intructions given on how to submit them.' if is_project
+					puts 'This is a Practice Lesson. No need to submit your code.' if is_practice
 					exit 1
 				end
 			end
@@ -159,12 +180,11 @@ module CommitLive
 				username = netrc.login
 				begin
 					Timeout::timeout(45) do
-						parentRepo = currentLesson.getValue('repo_url')
 						pullRequest = userGithub.client.create_pull_request(
-							parentRepo,
+							repo_url,
 							'master',
 							"#{username}:master",
-							"PR by #{username}"
+							"#{track_slug} - PR by #{username}"
 						)
 					end
 				rescue Octokit::Error => err
@@ -188,7 +208,7 @@ module CommitLive
 			end
 
 			def update_lesson_status
-				status.update('submitted_pull_request', lessonName)
+				status.update('submittedPr', track_slug)
 			end
 		end
 	end

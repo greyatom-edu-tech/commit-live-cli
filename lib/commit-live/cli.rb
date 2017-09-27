@@ -43,20 +43,20 @@ module CommitLive
 		end
 
 		desc "open <track-slug>", "This will fork given assignment. (for eg. clive open <track-slug>)"
-		def open(puzzle_name)
+		def open(track_slug)
 			# Fork and Clone User's current lesson
-			lab_name = CommitLive::Puzzle::Parser.new(puzzle_name.join(' ')).parse!
+			lab_name = CommitLive::Puzzle::Parser.new(track_slug.join(' ')).parse!
 			CommitLive::Open.new().openALesson(lab_name)
 		end
 
-		desc "submit", "This will submit your work"
-		def submit()
-			CommitLive::Submit.new().run
+		desc "submitn <track-slug>", "This will submit your work"
+		def submit(track_slug)
+			CommitLive::Submit.new().run(track_slug)
 		end
 
 		desc "test <track-slug>", "This will test your assignment. (for eg. clive test <track-slug>)"
-		def test(lab_name)
-			CommitLive::Test.new(lab_name).run
+		def test(track_slug)
+			CommitLive::Test.new(track_slug).run
 		end
 
 		desc 'version, -v, --version', 'Display the current version of the CommitLive gem'
