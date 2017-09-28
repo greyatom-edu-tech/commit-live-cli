@@ -44,9 +44,7 @@ module CommitLive
 
 		desc "open <track-slug>", "This will fork given assignment. (for eg. clive open <track-slug>)"
 		def open(track_slug)
-			# Fork and Clone User's current lesson
-			lab_name = CommitLive::Puzzle::Parser.new(track_slug.join(' ')).parse!
-			CommitLive::Open.new().openALesson(lab_name)
+			CommitLive::Open.new().openALesson(track_slug)
 		end
 
 		desc "submitn <track-slug>", "This will submit your work"
