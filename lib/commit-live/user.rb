@@ -28,7 +28,7 @@ module CommitLive
 						if login.nil? || password.nil?
 							save(user, token)
 						else
-							username = user.fetch('data')['username']
+							username = user.fetch('data')['userName']
 							welcome(username)
 						end
 					else
