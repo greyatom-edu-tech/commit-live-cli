@@ -83,6 +83,9 @@ module CommitLive
 				if lesson_type == "PRACTICE"
 					open_lesson
 				end
+				if is_project
+					open_project
+				end
 			else
 				open_lesson
 			end
@@ -159,6 +162,39 @@ module CommitLive
 					message = {
 						'type': 'open-lesson',
 						'title': lesson_name
+					}
+					response = api.post(
+						url,
+						headers: {
+							'content-type': 'application/json',
+						},
+						body: {
+							'message': Oj.dump(message, mode: :compat),
+						}
+					)
+				end
+			rescue Timeout::Error
+				puts "Open Lesson WebSocket call failed."
+				exit
+			end
+		end
+
+		def open_project
+			begin
+				Timeout::timeout(15) do
+					api = CommitLive::API.new("https://chat.commit.live")
+					netrc = CommitLive::NetrcInteractor.new()
+					netrc.read(machine: 'ga-extra')
+					username = netrc.login
+					url = URI.escape("/send/#{username}")
+					message = {
+						'type': 'open-lesson',
+						'title': lesson_name,
+						'message': {
+							'fileName': 'readme.md',
+							'type': 'forked',
+							'value': true
+						}
 					}
 					response = api.post(
 						url,
