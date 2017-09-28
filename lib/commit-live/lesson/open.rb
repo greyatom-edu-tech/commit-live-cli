@@ -43,6 +43,11 @@ module CommitLive
 			lesson.getValue('type')
 		end
 
+		def is_project_assignment
+			isProjectAssignment = lesson.getValue('isProjectAssignment')
+			!isProjectAssignment.nil? && isProjectAssignment == 1
+		end
+
 		def lesson_forked
 			forked = lesson.getValue('forked')
 			!forked.nil? && forked == 1
@@ -80,11 +85,8 @@ module CommitLive
 				if !is_project && lesson_type == "CODE" && !lesson_forked
 					lesson_status.update('forked', track_slug)
 				end
-				if lesson_type == "PRACTICE"
+				if lesson_type == "PRACTICE" || is_project
 					open_lesson
-				end
-				if is_project
-					open_project
 				end
 			else
 				open_lesson
@@ -161,35 +163,7 @@ module CommitLive
 					url = URI.escape("/send/#{username}")
 					message = {
 						'type': 'open-lesson',
-						'title': lesson_name
-					}
-					response = api.post(
-						url,
-						headers: {
-							'content-type': 'application/json',
-						},
-						body: {
-							'message': Oj.dump(message, mode: :compat),
-						}
-					)
-				end
-			rescue Timeout::Error
-				puts "Open Lesson WebSocket call failed."
-				exit
-			end
-		end
-
-		def open_project
-			begin
-				Timeout::timeout(15) do
-					api = CommitLive::API.new("https://chat.commit.live")
-					netrc = CommitLive::NetrcInteractor.new()
-					netrc.read(machine: 'ga-extra')
-					username = netrc.login
-					url = URI.escape("/send/#{username}")
-					message = {
-						'type': 'open-lesson',
-						'title': lesson_name,
+						'title': is_project_assignment ? track_slug : lesson_name,
 						'message': {
 							'fileName': 'readme.md',
 							'type': 'forked',
