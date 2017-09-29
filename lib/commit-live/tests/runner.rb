@@ -98,13 +98,13 @@ module CommitLive
 
 		def test_case_dir_path
 			filePath = ""
-			filePath += "#{title_slug}/" if is_project_assignment
+			filePath += "#{test_slug}/" if is_project_assignment
 			filePath += "tests/"
 			return filePath
 		end
 
-		def title_slug
-			lesson.getValue('titleSlug')
+		def test_slug
+			lesson.getValue('testCase')
 		end
 
 		def is_project_assignment
