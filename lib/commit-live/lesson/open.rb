@@ -82,14 +82,14 @@ module CommitLive
 				# change group owner
 				change_grp_owner
 				# lesson forked API change
-				if !is_project && lesson_type == "CODE" && !lesson_forked
-					lesson_status.update('forked', track_slug)
-				end
 				if lesson_type == "PRACTICE" || is_project
 					open_lesson
 				end
 			else
 				open_lesson
+			end
+			if !is_project && lesson_type == "CODE" && !lesson_forked
+				lesson_status.update('forked', track_slug)
 			end
 			# install dependencies
 			# cd into it and invoke bash
