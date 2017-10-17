@@ -9,7 +9,7 @@ require "oj"
 
 module CommitLive
 	class Open
-		attr_reader :rootDir, :lesson, :forkedRepo, :lesson_status, :sentry
+		attr_reader :rootDir, :lesson, :forked_ssh_url, :lesson_status, :sentry
 
 		HOME_DIR = File.expand_path("~")
 		ALLOWED_TYPES = ["CODE", "PRACTICE"]
@@ -27,7 +27,7 @@ module CommitLive
 			if lesson_type === "PRACTICE"
 				"git@github.com:#{lesson_repo}.git"
 			else
-				forkedRepo.ssh_url
+				forked_ssh_url
 			end
 		end
 
@@ -99,21 +99,8 @@ module CommitLive
 		def forkCurrentLesson
 			puts "Forking lesson..."
 			github = CommitLive::Github.new()
-			begin
-				Timeout::timeout(15) do
-					@forkedRepo = github.client.fork(lesson_repo)
-				end
-			rescue Octokit::Error => err
-				sentry.log_exception(err,
-					{
-						'event': 'forking',
-						'lesson_name' => lesson_name,
-					}
-				)
-			rescue Timeout::Error
-				puts "Please check your internet connection."
-				exit
-			end
+			github.post(lesson_repo, true)
+			@forked_ssh_url = github.getAttr("sshUrl")
 		end
 
 		def cloneCurrentLesson

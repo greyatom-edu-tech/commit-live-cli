@@ -175,31 +175,8 @@ module CommitLive
 
 			def createPullRequest
 				puts 'Creating Pull Request...'
-				userGithub = CommitLive::Github.new()
-				netrc.read(machine: 'ga-extra')
-				username = netrc.login
-				begin
-					Timeout::timeout(45) do
-						pullRequest = userGithub.client.create_pull_request(
-							repo_url,
-							'master',
-							"#{username}:master",
-							"#{track_slug} - PR by #{username}"
-						)
-					end
-				rescue Octokit::Error => err
-					if !err.message.match(/A pull request already exists/)
-						sentry.log_exception(err,
-							{
-								'event': 'creating-pull-request',
-								'lesson_name' => lessonName,
-							}
-						)
-					end
-				rescue Timeout::Error
-					puts "Please check your internet connection."
-					exit 1
-				end
+				github = CommitLive::Github.new()
+				github.post(repo_url)
 			end
 
 			def repo_name(remote: remote_name)
