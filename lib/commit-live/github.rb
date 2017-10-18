@@ -52,7 +52,7 @@ module CommitLive
 						}
 					)
 					@post_details = JSON.parse(response.body)
-					if response.status != 200
+					if response.status != 200 && !response.body.match(/A pull request already exists/)
 						sentry.log_message(log_title,
 							{
 								'url' => enc_url,
