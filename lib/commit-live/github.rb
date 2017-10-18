@@ -1,12 +1,14 @@
 require "commit-live/netrc-interactor"
+require "commit-live/sentry"
 require "commit-live/api"
 require "octokit"
 
 module CommitLive
 	class Github
-		attr_accessor :netrc, :post_details
+		attr_accessor :netrc, :post_details, :sentry
 		def initialize()
 			@netrc = CommitLive::NetrcInteractor.new()
+			@sentry = CommitLive::Sentry.new()
 		end
 
 		def token
