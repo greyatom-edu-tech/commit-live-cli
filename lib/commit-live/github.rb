@@ -25,6 +25,11 @@ module CommitLive
 			end
 		end
 
+		def getValue(key)
+			data = getAttr('data')
+			data[key]
+		end
+
 		def post(repo_name, isFork = false)
 			enc_url = "/v2/github/createPullRequest"
 			log_title = "#{owner} - Pull Request Failed"
@@ -34,15 +39,14 @@ module CommitLive
 			end
 			begin
 				Timeout::timeout(60) do
-					response = api.post(
+					response = CommitLive::API.new().post(
 						enc_url,
 						headers: {
 							'Authorization' => "#{token}",
 							'Content-Type' => 'application/json'
 						},
 						body: {
-							"owner": owner,
-							"repoName": repo_name
+							"repoUrl": repo_name
 						}
 					)
 					@post_details = JSON.parse(response.body)

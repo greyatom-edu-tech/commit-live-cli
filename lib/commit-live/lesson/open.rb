@@ -100,7 +100,7 @@ module CommitLive
 			puts "Forking lesson..."
 			github = CommitLive::Github.new()
 			github.post(lesson_repo, true)
-			@forked_ssh_url = github.getAttr("sshUrl")
+			@forked_ssh_url = github.getValue("sshUrl")
 		end
 
 		def cloneCurrentLesson
