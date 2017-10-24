@@ -82,7 +82,7 @@ module CommitLive
 				end
 			end
 			if strategy.results
-				# dump_results
+				dump_results
 			end
 			strategy.cleanup
 			return results
