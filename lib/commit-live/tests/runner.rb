@@ -153,7 +153,7 @@ module CommitLive
 							'titleSlugTestCase' => track_slug
 						}
 					)
-					if response.status != 201
+					if response.status != 200
 						sentry.log_message("Test Results Dump Failed",
 							{
 								'url' => url,
