@@ -168,7 +168,7 @@ module CommitLive
 					)
 				end
 			rescue Timeout::Error
-				puts "Open Lesson WebSocket call failed."
+				puts "The Assignment already exists! Use the File-Browser to open files under it."
 				exit
 			end
 		end
