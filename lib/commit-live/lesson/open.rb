@@ -106,9 +106,7 @@ module CommitLive
 		def cloneCurrentLesson
 			puts "Cloning lesson..."
 			begin
-				Timeout::timeout(15) do
-					Git.clone(ssh_url, lesson_name, path: rootDir)
-				end
+				Git.clone(ssh_url, lesson_name, path: rootDir)
 			rescue Git::GitExecuteError => err
 				sentry.log_exception(err,
 					{
@@ -117,9 +115,6 @@ module CommitLive
 						'current-directory' => Dir.pwd
 					}
 				)
-			rescue Timeout::Error
-				puts "Cannot clone this lesson right now. Please try again."
-				exit
 			end
 		end
 
