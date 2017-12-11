@@ -6,6 +6,7 @@ require "commit-live/api"
 require "commit-live/sentry"
 require "commit-live/netrc-interactor"
 require "commit-live/tests/strategies/python-test"
+require "terminal-table"
 
 module CommitLive
 	class Test
@@ -142,11 +143,12 @@ module CommitLive
 		def check_if_user_in_right_folder
 			dirname = File.basename(Dir.getwd)
 			if dirname != title_slug
+				table = Terminal::Table.new do |t|
+					t.rows = ['cd ~/Workspace/code/#{title_slug}/']
+				end
 				puts "It seems that you are in the wrong directory."
 				puts "Use the following command to go there"
-				puts "."
-				puts "`cd ~/Workspace/code/#{title_slug}/`"
-				puts "."
+				puts table
 				puts "Then use the `clive test <track-slug>` command"
 				exit 1
 			end

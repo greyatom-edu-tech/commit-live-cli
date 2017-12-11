@@ -91,12 +91,13 @@ module CommitLive
 			def check_if_user_in_right_folder
 				dirname = File.basename(Dir.getwd)
 				if dirname != title_slug
+					table = Terminal::Table.new do |t|
+						t.rows = ['cd ~/Workspace/code/#{title_slug}/']
+					end
 					puts "It seems that you are in the wrong directory."
 					puts "Use the following command to go there"
-					puts "."
-					puts "`cd ~/Workspace/code/#{title_slug}/`"
-					puts "."
-					puts "Then use `clive submit <track-slug>` command"
+					puts table
+					puts "Then use the `clive test <track-slug>` command"
 					exit 1
 				end
 			end
