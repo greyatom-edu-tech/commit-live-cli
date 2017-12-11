@@ -47,7 +47,7 @@ module CommitLive
 			CommitLive::Open.new().openALesson(track_slug)
 		end
 
-		desc "submitn <track-slug>", "This will submit your work"
+		desc "submitn <track-slug>", "This will submit your work. (for eg. clive open <track-slug>)"
 		def submit(track_slug)
 			CommitLive::Submit.new().run(track_slug)
 		end

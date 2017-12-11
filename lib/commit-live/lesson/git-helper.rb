@@ -27,6 +27,7 @@ module CommitLive
 			def commitAndPush
 				checkRemote
 				check_if_practice_lesson
+				check_if_user_in_right_folder
 				# Check if User passed test cases
 				if is_test_case_passed
 					# Push to User's Github
@@ -74,11 +75,26 @@ module CommitLive
 				currentLesson.getValue('repoUrl')
 			end
 
+			def title_slug
+				currentLesson.getValue('titleSlug')
+			end
+
 			def check_if_practice_lesson
 				currentLesson.getCurrentLesson(track_slug)
 				if is_project || is_practice
 					puts 'This is a Project. Go to individual assignments and follow intructions given on how to submit them.' if is_project
 					puts 'This is a Practice Lesson. No need to submit your code.' if is_practice
+					exit 1
+				end
+			end
+
+			def check_if_user_in_right_folder
+				dirname = File.basename(Dir.getwd)
+				if dirname != title_slug
+					puts "It seems that you are in the wrong directory."
+					puts "Use the following command to go there"
+					puts "\n\t`cd ~/Workspace/code/#{title_slug}/`"
+					puts "\nThen use `clive submit <track-slug>` command"
 					exit 1
 				end
 			end

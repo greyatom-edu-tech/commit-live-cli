@@ -20,6 +20,7 @@ module CommitLive
 			@track_slug = trackSlug
 			check_lesson_dir
 			check_if_practice_lesson
+			check_if_user_in_right_folder
 			die if !strategy
 			@sentry = CommitLive::Sentry.new()
 			if File.exists?("#{HOME_DIR}/.ga-config")
@@ -107,6 +108,10 @@ module CommitLive
 			lesson.getValue('testCase')
 		end
 
+		def title_slug
+			lesson.getValue('titleSlug')
+		end
+
 		def is_project_assignment
 			isProjectAssignment = lesson.getValue('isProjectAssignment')
 			!isProjectAssignment.nil? && isProjectAssignment == 1
@@ -131,6 +136,16 @@ module CommitLive
 				puts 'This is a Project. Go to individual assignments and follow intructions given on how to pass test cases for them.' if is_project
 				puts 'This is a Practice Lesson. No need to run tests on it.' if is_practice
 				exit 1
+			end
+		end
+
+		def check_if_user_in_right_folder
+			dirname = File.basename(Dir.getwd)
+			if dirname != title_slug
+				puts "It seems that you are in the wrong directory."
+				puts "Use the following command to go there"
+				puts "\n\t`cd ~/Workspace/code/#{title_slug}/`"
+				puts "\nThen use the `clive test <track-slug>` command"
 			end
 		end
 
