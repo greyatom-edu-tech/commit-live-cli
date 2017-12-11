@@ -146,6 +146,7 @@ module CommitLive
 				puts "Use the following command to go there"
 				puts "\n\t`cd ~/Workspace/code/#{title_slug}/`"
 				puts "\nThen use the `clive test <track-slug>` command"
+				exit 1
 			end
 		end
 
