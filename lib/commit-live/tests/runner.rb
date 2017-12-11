@@ -144,8 +144,10 @@ module CommitLive
 			if dirname != title_slug
 				puts "It seems that you are in the wrong directory."
 				puts "Use the following command to go there"
-				puts "\n\n\t`cd ~/Workspace/code/#{title_slug}/`"
-				puts "\nThen use the `clive test <track-slug>` command"
+				puts ""
+				puts "`cd ~/Workspace/code/#{title_slug}/`"
+				puts ""
+				puts "Then use the `clive test <track-slug>` command"
 				exit 1
 			end
 		end
