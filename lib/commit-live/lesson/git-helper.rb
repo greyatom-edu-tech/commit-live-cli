@@ -92,7 +92,7 @@ module CommitLive
 				dirname = File.basename(Dir.getwd)
 				if dirname != title_slug
 					table = Terminal::Table.new do |t|
-						t.rows = ['cd ~/Workspace/code/#{title_slug}/']
+						t.rows = [["cd ~/Workspace/code/#{title_slug}/"]]
 					end
 					puts "It seems that you are in the wrong directory."
 					puts "Use the following command to go there"
