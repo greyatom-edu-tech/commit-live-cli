@@ -97,7 +97,7 @@ module CommitLive
 					puts "It seems that you are in the wrong directory."
 					puts "Use the following command to go there"
 					puts table
-					puts "Then use the `clive test <track-slug>` command"
+					puts "Then use the `clive submit <track-slug>` command"
 					exit 1
 				end
 			end
