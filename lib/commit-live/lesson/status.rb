@@ -2,6 +2,7 @@ require "commit-live/api"
 require "commit-live/netrc-interactor"
 require "commit-live/sentry"
 require "uri"
+require "oj"
 
 module CommitLive
 	class Status
@@ -18,7 +19,7 @@ module CommitLive
 			netrc.password
 		end
 
-		def update(type, trackName)
+		def update(type, trackName, shouldAnalyze = false, dump_data = {}, file_path = "")
 			enc_url = URI.escape("/v2/user/track/#{trackName}")
 			begin
 				Timeout::timeout(60) do
@@ -29,7 +30,10 @@ module CommitLive
 							'Content-Type' => 'application/json'
 						},
 						body: {
-							'action' => type
+							'action' => type,
+							'analysis' => shouldAnalyze ? 1 : 0,
+							'data' => Oj.dump(dump_data, mode: :compat),
+							'filePath' => file_path
 						}
 					)
 					if response.status != 201

@@ -7,9 +7,10 @@ require "commit-live/sentry"
 module CommitLive
 	class Submit
 		class GitHelper
-			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName, :sentry, :track_slug
+			attr_reader   :git, :currentLesson, :netrc, :status, :lessonName, :sentry, :track_slug, :rootDir
 			attr_accessor :remote_name
 
+			HOME_DIR = File.expand_path("~")
 			REPO_BELONGS_TO_US = [
 				'commit-live-students'
 			]
@@ -22,6 +23,9 @@ module CommitLive
 				@status = CommitLive::Status.new
 				@lessonName = repo_name(remote: 'origin')
 				@sentry = CommitLive::Sentry.new()
+				if File.exists?("#{HOME_DIR}/.ga-config")
+					@rootDir = YAML.load(File.read("#{HOME_DIR}/.ga-config"))[:workspace]
+				end
 			end
 
 			def commitAndPush
@@ -51,9 +55,24 @@ module CommitLive
 
 			private
 
+			def dir_path
+				filePath = "#{title_slug}/"
+				filePath += "#{test_slug}/" if is_project_assignment
+				return filePath
+			end
+
 			def is_test_case_passed
 				isTestCasesPassed = currentLesson.getValue('testCasesPassed')
 				!isTestCasesPassed.nil? && isTestCasesPassed == 1
+			end
+
+			def test_slug
+				currentLesson.getValue('testCase')
+			end
+
+			def is_project_assignment
+				isProjectAssignment = currentLesson.getValue('isProjectAssignment')
+				!isProjectAssignment.nil? && isProjectAssignment == 1
 			end
 
 			def is_submitted_pr
@@ -204,7 +223,8 @@ module CommitLive
 			end
 
 			def update_lesson_status
-				status.update('submittedPr', track_slug)
+				file_path = "#{rootDir}/#{dir_path}/build.py"
+				status.update('submittedPr', track_slug, true, {}, file_path)
 			end
 		end
 	end

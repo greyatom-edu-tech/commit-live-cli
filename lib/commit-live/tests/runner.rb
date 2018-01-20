@@ -71,21 +71,22 @@ module CommitLive
 			if strategy.results
 				strategy.print_results
 			end
-			if updateStatus
+			file_path = "#{rootDir}/#{dir_path}/build.py"
+			if updateStatus && strategy.results
 				if results
 					# test case passed
 					puts 'Great! You have passed all the test cases.'
 					puts 'Use `clive submit` to push your changes.'
-					CommitLive::Status.new().update('testCasesPassed', track_slug)
+					CommitLive::Status.new().update('testCasesPassed', track_slug, true, strategy.results, file_path)
 				else
 					# test case failed
 					puts 'Oops! You still have to pass all the test cases.'
-					CommitLive::Status.new().update('testCasesFailed', track_slug)
+					CommitLive::Status.new().update('testCasesFailed', track_slug, true, strategy.results, file_path)
 				end
 			end
-			if strategy.results
-				dump_results
-			end
+			# if strategy.results
+			# 	dump_results
+			# end
 			strategy.cleanup
 			return results
 		end
@@ -96,6 +97,12 @@ module CommitLive
 
 		def clear_changes_in_tests
 			system("git checkout HEAD -- #{test_case_dir_path}")
+		end
+
+		def dir_path
+			filePath = "#{title_slug}/"
+			filePath += "#{test_slug}/" if is_project_assignment
+			return filePath
 		end
 
 		def test_case_dir_path
