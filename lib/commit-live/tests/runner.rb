@@ -84,9 +84,6 @@ module CommitLive
 					CommitLive::Status.new().update('testCasesFailed', track_slug, true, strategy.results, file_path)
 				end
 			end
-			# if strategy.results
-			# 	dump_results
-			# end
 			strategy.cleanup
 			return results
 		end
@@ -158,43 +155,6 @@ module CommitLive
 				puts table
 				puts "Then use the `clive test <track-slug>` command"
 				exit 1
-			end
-		end
-
-		def dump_results
-			begin
-				Timeout::timeout(15) do
-					api = CommitLive::API.new
-					netrc = CommitLive::NetrcInteractor.new()
-					netrc.read
-					token = netrc.password
-					url = URI.escape("/v2/dumps")
-					response = api.post(
-						url,
-						headers: {
-							'Authorization' => "#{token}",
-							'Content-Type' => 'application/json',
-						},
-						body: {
-							'data' => Oj.dump(strategy.results, mode: :compat),
-							'titleSlugTestCase' => track_slug
-						}
-					)
-					if response.status != 200
-						sentry.log_message("Test Results Dump Failed",
-							{
-								'url' => url,
-								'track-slug' => track_slug,
-								'results' => strategy.results,
-								'response-body' => response.body,
-								'response-status' => response.status
-							}
-						)
-					end
-				end
-			rescue Timeout::Error
-				puts "Error while dumping test results."
-				exit
 			end
 		end
 
