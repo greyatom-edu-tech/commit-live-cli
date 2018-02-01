@@ -43,7 +43,10 @@ module CommitLive
 								'track_name' => trackName,
 								'params' => {
 									'method' => 'assignment_status',
-									'action' => type
+									'action' => type,
+									'analysis' => shouldAnalyze ? 1 : 0,
+									'data' => Oj.dump(dump_data, mode: :compat),
+									'filePath' => file_path
 								},
 								'response-body' => response.body,
 								'response-status' => response.status
