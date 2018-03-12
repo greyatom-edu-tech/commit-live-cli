@@ -2,7 +2,7 @@ module CommitLive
 	class Endpoint
 		END_POINTS = {
 			"PROD" => 'https://api2.commit.live',
-			"DEV" => 'http://api.greyatom.com', 
+			"DEV" => 'http://develop.api.greyatom.com', 
 			"LOCAL" => 'http://api.greyatom.com'
 		}
 		def get()
